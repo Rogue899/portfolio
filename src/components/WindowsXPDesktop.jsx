@@ -26,6 +26,9 @@ const WindowsXPDesktop = () => {
   const [editValue, setEditValue] = useState('');
   const [selectedIcons, setSelectedIcons] = useState(new Set());
   const [selectionBox, setSelectionBox] = useState(null);
+  const [theme, setTheme] = useState('classic-blue'); // classic-blue, bliss, berserker
+  const [snapToGrid, setSnapToGrid] = useState(true);
+  const [clipboard, setClipboard] = useState(null);
   const dragState = useRef({ isDragging: false, windowId: null, offsetX: 0, offsetY: 0 });
   const iconDragState = useRef({ isDragging: false, iconId: null, offsetX: 0, offsetY: 0, hasMoved: false });
   const selectionState = useRef({ isSelecting: false, startX: 0, startY: 0 });
@@ -325,6 +328,133 @@ const WindowsXPDesktop = () => {
     return () => clearTimeout(timeoutId);
   }, [iconPositions, desktopItems]);
 
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Don't trigger shortcuts when typing in inputs
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || editingItem) {
+        return;
+      }
+
+      // Ctrl+A - Select all icons
+      if ((e.ctrlKey || e.metaKey) && e.key === 'a') {
+        e.preventDefault();
+        const allIconIds = new Set([
+          'portfolio',
+          ...projects.map(p => p.id),
+          ...desktopItems.map(item => item.id)
+        ]);
+        setSelectedIcons(allIconIds);
+      }
+
+      // Delete - Delete selected items
+      if (e.key === 'Delete' && selectedIcons.size > 0) {
+        e.preventDefault();
+        const itemsToDelete = Array.from(selectedIcons).filter(id => 
+          id !== 'portfolio' && !projects.some(p => p.id === id)
+        );
+        if (itemsToDelete.length > 0) {
+          setDeleteConfirm({
+            itemId: itemsToDelete[0],
+            itemName: itemsToDelete.length === 1 
+              ? (desktopItems.find(i => i.id === itemsToDelete[0])?.name || 'item')
+              : `${itemsToDelete.length} items`,
+            allItems: itemsToDelete
+          });
+        }
+      }
+
+      // F2 - Rename selected item
+      if (e.key === 'F2' && selectedIcons.size === 1) {
+        e.preventDefault();
+        const selectedId = Array.from(selectedIcons)[0];
+        const item = desktopItems.find(i => i.id === selectedId);
+        if (item) {
+          handleRename(selectedId);
+        }
+      }
+
+      // Ctrl+C - Copy
+      if ((e.ctrlKey || e.metaKey) && e.key === 'c' && selectedIcons.size > 0) {
+        e.preventDefault();
+        const itemsToCopy = Array.from(selectedIcons)
+          .map(id => desktopItems.find(item => item.id === id))
+          .filter(Boolean);
+        if (itemsToCopy.length > 0) {
+          setClipboard({ type: 'copy', items: itemsToCopy });
+        }
+      }
+
+      // Ctrl+V - Paste
+      if ((e.ctrlKey || e.metaKey) && e.key === 'v' && clipboard) {
+        e.preventDefault();
+        if (clipboard.items && clipboard.items.length > 0) {
+          clipboard.items.forEach(item => {
+            if (clipboard.type === 'copy') {
+              // Copy: create new items
+              const newId = `${item.type}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+              const newItem = {
+                ...item,
+                id: newId,
+                x: (item.x || 20) + 20,
+                y: (item.y || 20) + 20
+              };
+              setDesktopItems(prev => [...prev, newItem]);
+              setIconPositions(prev => ({
+                ...prev,
+                [newId]: { x: newItem.x, y: newItem.y }
+              }));
+            } else if (clipboard.type === 'cut') {
+              // Cut: move existing items
+              const currentPos = iconPositions[item.id] || { x: item.x || 20, y: item.y || 20 };
+              setIconPositions(prev => ({
+                ...prev,
+                [item.id]: { x: currentPos.x + 20, y: currentPos.y + 20 }
+              }));
+            }
+          });
+          
+          // Delete items if cut
+          if (clipboard.type === 'cut') {
+            const itemsToDelete = clipboard.items.map(item => item.id);
+            const updatedItems = desktopItems.filter(i => !itemsToDelete.includes(i.id));
+            setDesktopItems(updatedItems);
+            const updatedPositions = { ...iconPositions };
+            itemsToDelete.forEach(id => {
+              const currentPos = iconPositions[id] || { x: 20, y: 20 };
+              updatedPositions[id] = { x: currentPos.x + 20, y: currentPos.y + 20 };
+            });
+            setIconPositions(updatedPositions);
+          }
+          
+          setClipboard(null);
+        }
+      }
+
+      // Ctrl+X - Cut
+      if ((e.ctrlKey || e.metaKey) && e.key === 'x' && selectedIcons.size > 0) {
+        e.preventDefault();
+        const itemsToCut = Array.from(selectedIcons)
+          .map(id => desktopItems.find(item => item.id === id))
+          .filter(Boolean);
+        if (itemsToCut.length > 0) {
+          setClipboard({ type: 'cut', items: itemsToCut });
+        }
+      }
+
+      // Escape - Deselect all
+      if (e.key === 'Escape') {
+        setSelectedIcons(new Set());
+        setSelectionBox(null);
+        setStartMenuOpen(false);
+        setContextMenu(null);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedIcons, desktopItems, clipboard, editingItem]);
+
   // Icon dragging handlers
   const handleIconMouseDown = (e, iconId) => {
     // Don't interfere with drag and drop for files/folders
@@ -368,17 +498,56 @@ const WindowsXPDesktop = () => {
         if (iconDragState.current.isDragging) {
           const desktopRect = document.querySelector('.desktop-background')?.getBoundingClientRect();
           if (desktopRect) {
-            const newX = e.clientX - desktopRect.left - iconDragState.current.offsetX;
-            const newY = e.clientY - desktopRect.top - iconDragState.current.offsetY;
+            let newX = e.clientX - desktopRect.left - iconDragState.current.offsetX;
+            let newY = e.clientY - desktopRect.top - iconDragState.current.offsetY;
+            
+            // Snap to grid if enabled
+            if (snapToGrid) {
+              const gridSize = 20;
+              newX = Math.round(newX / gridSize) * gridSize;
+              newY = Math.round(newY / gridSize) * gridSize;
+            }
             
             // Constrain to desktop bounds
             const constrainedX = Math.max(0, Math.min(newX, desktopRect.width - 80));
             const constrainedY = Math.max(0, Math.min(newY, desktopRect.height - 80));
             
-            setIconPositions(prev => ({
-              ...prev,
-              [iconId]: { x: constrainedX, y: constrainedY }
-            }));
+            // If multiple icons selected, move them all
+            if (selectedIcons.has(iconId) && selectedIcons.size > 1) {
+              const currentPos = iconPositions[iconId] || { x: 0, y: 0 };
+              const deltaX = constrainedX - currentPos.x;
+              const deltaY = constrainedY - currentPos.y;
+              
+              setIconPositions(prev => {
+                const updated = { ...prev };
+                selectedIcons.forEach(selectedId => {
+                  if (selectedId === iconId) {
+                    updated[selectedId] = { x: constrainedX, y: constrainedY };
+                  } else {
+                    const currentPos = prev[selectedId] || { x: 0, y: 0 };
+                    let newPosX = currentPos.x + deltaX;
+                    let newPosY = currentPos.y + deltaY;
+                    
+                    if (snapToGrid) {
+                      const gridSize = 20;
+                      newPosX = Math.round(newPosX / gridSize) * gridSize;
+                      newPosY = Math.round(newPosY / gridSize) * gridSize;
+                    }
+                    
+                    updated[selectedId] = {
+                      x: Math.max(0, Math.min(newPosX, desktopRect.width - 80)),
+                      y: Math.max(0, Math.min(newPosY, desktopRect.height - 80))
+                    };
+                  }
+                });
+                return updated;
+              });
+            } else {
+              setIconPositions(prev => ({
+                ...prev,
+                [iconId]: { x: constrainedX, y: constrainedY }
+              }));
+            }
           }
         }
       }
@@ -444,12 +613,22 @@ const WindowsXPDesktop = () => {
     
     const fileName = generateUniqueName('file');
     const fileId = `file_${Date.now()}`;
+    let finalX = Math.max(0, x);
+    let finalY = Math.max(0, y);
+    
+    // Snap to grid if enabled
+    if (snapToGrid) {
+      const gridSize = 20;
+      finalX = Math.round(finalX / gridSize) * gridSize;
+      finalY = Math.round(finalY / gridSize) * gridSize;
+    }
+    
     const newFile = {
       id: fileId,
       name: fileName,
       type: 'file',
-      x: Math.max(0, x),
-      y: Math.max(0, y)
+      x: finalX,
+      y: finalY
     };
     
     // Create empty file on backend
@@ -489,12 +668,22 @@ const WindowsXPDesktop = () => {
     const y = desktopRect ? contextMenu.y - desktopRect.top - 40 : contextMenu.y - 200;
     
     const folderName = generateUniqueName('folder');
+    let finalX = Math.max(0, x);
+    let finalY = Math.max(0, y);
+    
+    // Snap to grid if enabled
+    if (snapToGrid) {
+      const gridSize = 20;
+      finalX = Math.round(finalX / gridSize) * gridSize;
+      finalY = Math.round(finalY / gridSize) * gridSize;
+    }
+    
     const newFolder = {
       id: `folder_${Date.now()}`,
       name: folderName,
       type: 'folder',
-      x: Math.max(0, x),
-      y: Math.max(0, y)
+      x: finalX,
+      y: finalY
     };
     setDesktopItems(prev => [...prev, newFolder]);
     setIconPositions(prev => ({
@@ -545,17 +734,20 @@ const WindowsXPDesktop = () => {
   const confirmDelete = () => {
     if (!deleteConfirm) return;
     
-    const { itemId } = deleteConfirm;
+    const { itemId, allItems } = deleteConfirm;
+    const itemsToDelete = allItems || [itemId];
     
     // Remove from desktop items
-    const updatedItems = desktopItems.filter(i => i.id !== itemId);
+    const updatedItems = desktopItems.filter(i => !itemsToDelete.includes(i.id));
     setDesktopItems(updatedItems);
     
     // Remove from icon positions
     const updatedPositions = { ...iconPositions };
-    delete updatedPositions[itemId];
+    itemsToDelete.forEach(id => delete updatedPositions[id]);
     setIconPositions(updatedPositions);
     
+    // Clear selection
+    setSelectedIcons(new Set());
     setDeleteConfirm(null);
     
     // Save to backend after deletion
@@ -583,6 +775,33 @@ const WindowsXPDesktop = () => {
 
   const cancelDelete = () => {
     setDeleteConfirm(null);
+  };
+
+  // Auto-arrange icons function
+  const autoArrangeIcons = () => {
+    const gridSize = 100;
+    const startX = 20;
+    const startY = 20;
+    const desktopWidth = window.innerWidth;
+    const iconsPerRow = Math.floor((desktopWidth - 40) / gridSize);
+    
+    const allIcons = [
+      { id: 'portfolio', ...iconPositions.portfolio },
+      ...projects.map((p, idx) => ({ id: p.id, ...iconPositions[p.id] })),
+      ...desktopItems.map(item => ({ id: item.id, ...iconPositions[item.id] }))
+    ];
+    
+    const updatedPositions = {};
+    allIcons.forEach((icon, idx) => {
+      const row = Math.floor(idx / iconsPerRow);
+      const col = idx % iconsPerRow;
+      updatedPositions[icon.id] = {
+        x: startX + (col * gridSize),
+        y: startY + (row * gridSize)
+      };
+    });
+    
+    setIconPositions(updatedPositions);
   };
 
   const projects = [
@@ -627,7 +846,7 @@ const WindowsXPDesktop = () => {
     <div className="windows-xp-desktop">
       {/* Desktop Background */}
       <div 
-        className="desktop-background"
+        className={`desktop-background theme-${theme}`}
         onMouseDown={(e) => {
           // Only start selection if clicking on desktop (not on an icon)
           if (e.target.classList.contains('desktop-background') || e.target.closest('.desktop-icon') === null) {

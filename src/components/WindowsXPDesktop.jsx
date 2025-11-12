@@ -368,9 +368,11 @@ const WindowsXPDesktop = () => {
       if (e.key === 'F2' && selectedIcons.size === 1) {
         e.preventDefault();
         const selectedId = Array.from(selectedIcons)[0];
+        const selectedId = Array.from(selectedIcons)[0];
         const item = desktopItems.find(i => i.id === selectedId);
         if (item) {
-          handleRename(selectedId);
+          setEditingItem(selectedId);
+          setEditValue(item.name);
         }
       }
 
@@ -453,7 +455,7 @@ const WindowsXPDesktop = () => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedIcons, desktopItems, clipboard, editingItem]);
+  }, [selectedIcons, desktopItems, clipboard, editingItem, projects, iconPositions]);
 
   // Icon dragging handlers
   const handleIconMouseDown = (e, iconId) => {

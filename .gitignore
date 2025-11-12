@@ -25,3 +25,4 @@ dist-ssr
 
 # Backend data
 desktop-data.json
+files/

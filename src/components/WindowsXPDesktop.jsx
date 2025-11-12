@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import './WindowsXPDesktop.css';
 import PortfolioBook from './PortfolioBook';
 import ProjectFolder from './ProjectFolder';
+import FileEditor from './FileEditor';
 import ContextMenu from './ContextMenu';
 import TicTacToe from './TicTacToe';
 import Pong from './Pong';
@@ -413,19 +414,42 @@ const WindowsXPDesktop = () => {
     });
   };
 
-  const handleCreateFile = () => {
+  const handleCreateFile = async () => {
     const desktopRect = document.querySelector('.desktop-background')?.getBoundingClientRect();
     const x = desktopRect ? contextMenu.x - desktopRect.left - 40 : contextMenu.x - 200;
     const y = desktopRect ? contextMenu.y - desktopRect.top - 40 : contextMenu.y - 200;
     
     const fileName = generateUniqueName('file');
+    const fileId = `file_${Date.now()}`;
     const newFile = {
-      id: `file_${Date.now()}`,
+      id: fileId,
       name: fileName,
       type: 'file',
       x: Math.max(0, x),
       y: Math.max(0, y)
     };
+    
+    // Create empty file on backend
+    const apiUrl = import.meta.env.PROD 
+      ? `/api/files/${fileId}`
+      : `http://localhost:3001/api/files/${fileId}`;
+    
+    try {
+      await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          fileName: fileName,
+          content: ''
+        })
+      });
+    } catch (error) {
+      console.error('Error creating file on backend:', error);
+      // Continue anyway - file will be created when first saved
+    }
+    
     setDesktopItems(prev => [...prev, newFile]);
     setIconPositions(prev => ({
       ...prev,
@@ -671,7 +695,24 @@ const WindowsXPDesktop = () => {
               onDoubleClick={(e) => {
                 if (editingItem === item.id) return;
                 handleIconDoubleClick(e, () => {
-                  // File/folder double-click action
+                  if (item.type === 'file') {
+                    // Open file in editor
+                    openWindow(
+                      `file_${item.id}`, 
+                      item.name, 
+                      <FileEditor 
+                        fileId={item.id} 
+                        fileName={item.name}
+                        onClose={() => closeWindow(`file_${item.id}`)}
+                        onSave={() => {
+                          // File saved successfully
+                        }}
+                      />
+                    );
+                  } else {
+                    // Folder double-click (could open folder view in future)
+                    // For now, do nothing
+                  }
                 });
               }}
               onContextMenu={(e) => {

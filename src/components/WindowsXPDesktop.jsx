@@ -368,7 +368,6 @@ const WindowsXPDesktop = () => {
       if (e.key === 'F2' && selectedIcons.size === 1) {
         e.preventDefault();
         const selectedId = Array.from(selectedIcons)[0];
-        const selectedId = Array.from(selectedIcons)[0];
         const item = desktopItems.find(i => i.id === selectedId);
         if (item) {
           setEditingItem(selectedId);
@@ -962,11 +961,7 @@ const WindowsXPDesktop = () => {
                 left: selectionBox.x,
                 top: selectionBox.y,
                 width: selectionBox.width,
-                height: selectionBox.height,
-                border: '1px dashed #316ac5',
-                backgroundColor: 'rgba(49, 106, 197, 0.1)',
-                pointerEvents: 'none',
-                zIndex: 1000
+                height: selectionBox.height
               }}
             />
           )}

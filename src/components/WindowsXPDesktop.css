@@ -109,8 +109,9 @@
 
 .selection-box {
   position: absolute;
-  border: 1px dashed #316ac5;
-  background-color: rgba(49, 106, 197, 0.1);
+  border: 2px solid #ffffff;
+  background-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.8);
   pointer-events: none;
   z-index: 1000;
 }

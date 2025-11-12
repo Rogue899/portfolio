@@ -27,7 +27,9 @@ const GitHubProfile = () => {
         setLoading(false);
       })
       .catch(error => {
-        console.error('Error fetching GitHub profile:', error);
+        if (import.meta.env.DEV) {
+          console.error('Error fetching GitHub profile:', error);
+        }
         // Fallback data
         setProfileData({
           login: username,

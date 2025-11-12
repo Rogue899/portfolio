@@ -462,7 +462,9 @@ const WindowsXPDesktop = () => {
         })
       });
     } catch (error) {
-      console.error('Error creating file on backend:', error);
+      if (import.meta.env.DEV) {
+        console.error('Error creating file on backend:', error);
+      }
       // Continue anyway - file will be created when first saved
     }
     

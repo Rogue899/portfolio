@@ -23,7 +23,9 @@ const LinkedInProfile = () => {
         setLoading(false);
       })
       .catch(error => {
-        console.error('Error fetching LinkedIn profile:', error);
+        if (import.meta.env.DEV) {
+          console.error('Error fetching LinkedIn profile:', error);
+        }
         // Fallback to accurate LinkedIn data
         setProfileData({
           name: 'Tarek Roukos',

@@ -33,7 +33,9 @@ const FileEditor = ({ fileId, fileName, onClose, onSave }) => {
         setLoading(false);
       })
       .catch(error => {
-        console.error('Error loading file:', error);
+        if (import.meta.env.DEV) {
+          console.error('Error loading file:', error);
+        }
         setContent('');
         setLoading(false);
       });
@@ -72,9 +74,11 @@ const FileEditor = ({ fileId, fileName, onClose, onSave }) => {
         type: 'success'
       });
       if (onSave) onSave();
-    } catch (error) {
-      console.error('Error saving file:', error);
-      setSaving(false);
+        } catch (error) {
+          if (import.meta.env.DEV) {
+            console.error('Error saving file:', error);
+          }
+          setSaving(false);
       setNotification({
         title: 'Error',
         message: 'Failed to save file. Please try again.',

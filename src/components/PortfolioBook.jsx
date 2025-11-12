@@ -145,7 +145,7 @@ https://www.hackerrank.com/certificates/93f72b72b7e6
           }
         }
       } catch (error) {
-        console.log('Page count not available yet');
+        // Page count not available yet
       }
     }, 500);
     return () => clearTimeout(timer);

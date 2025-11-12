@@ -328,6 +328,45 @@ const WindowsXPDesktop = () => {
     return () => clearTimeout(timeoutId);
   }, [iconPositions, desktopItems]);
 
+  // Define projects array before useEffect that uses it
+  const projects = [
+    { 
+      id: 'rickmorty', 
+      title: 'Rick & Morty Explorer', 
+      description: 'Character explorer app',
+      url: 'https://rick-and-morty-explorer-woad.vercel.app/',
+      type: 'iframe'
+    },
+    { 
+      id: 'frontend', 
+      title: 'Frontend Project', 
+      description: 'Frontend showcase',
+      url: 'https://frontend-nine-iota-66.vercel.app/',
+      type: 'iframe'
+    },
+    { 
+      id: 'tictactoe', 
+      title: 'Tic Tac Toe', 
+      description: 'Classic Tic Tac Toe game',
+      type: 'game',
+      component: <TicTacToe />
+    },
+    { 
+      id: 'pong', 
+      title: 'Pong', 
+      description: 'Classic Pong game',
+      type: 'game',
+      component: <Pong />
+    },
+    { 
+      id: 'browser', 
+      title: 'Browser', 
+      description: 'Web browser',
+      type: 'browser',
+      component: <Browser />
+    },
+  ];
+
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -777,44 +816,6 @@ const WindowsXPDesktop = () => {
   const cancelDelete = () => {
     setDeleteConfirm(null);
   };
-
-  const projects = [
-    { 
-      id: 'rickmorty', 
-      title: 'Rick & Morty Explorer', 
-      description: 'Character explorer app',
-      url: 'https://rick-and-morty-explorer-woad.vercel.app/',
-      type: 'iframe'
-    },
-    { 
-      id: 'frontend', 
-      title: 'Frontend Project', 
-      description: 'Frontend showcase',
-      url: 'https://frontend-nine-iota-66.vercel.app/',
-      type: 'iframe'
-    },
-    { 
-      id: 'tictactoe', 
-      title: 'Tic Tac Toe', 
-      description: 'Classic Tic Tac Toe game',
-      type: 'game',
-      component: <TicTacToe />
-    },
-    { 
-      id: 'pong', 
-      title: 'Pong', 
-      description: 'Classic Pong game',
-      type: 'game',
-      component: <Pong />
-    },
-    { 
-      id: 'browser', 
-      title: 'Browser', 
-      description: 'Web browser',
-      type: 'browser',
-      component: <Browser />
-    },
-  ];
 
   // Auto-arrange icons function
   const autoArrangeIcons = () => {

@@ -40,14 +40,18 @@ const WindowsXPDesktop = () => {
       bringToFront(id);
       return;
     }
+    
+    // Detect mobile devices
+    const isMobile = window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
     setOpenWindows(prev => [...prev, { 
       id, 
       title, 
       content, 
       zIndex: prev.length,
-      x: window.innerWidth / 2 - 500,
-      y: window.innerHeight / 2 - 350,
-      isMaximized: false,
+      x: isMobile ? 0 : window.innerWidth / 2 - 500,
+      y: isMobile ? 0 : window.innerHeight / 2 - 350,
+      isMaximized: isMobile, // Auto-maximize on mobile
       savedPosition: { x: window.innerWidth / 2 - 500, y: window.innerHeight / 2 - 350 },
       savedSize: { width: 1000, height: 700 },
       width: 1000,
@@ -809,11 +813,11 @@ const WindowsXPDesktop = () => {
             className={`window ${window.isMaximized ? 'maximized' : ''}`}
             style={{ 
               zIndex: window.zIndex + 1000,
-              left: window.isMaximized ? 0 : (window.x || '50%'),
-              top: window.isMaximized ? 0 : (window.y || '50%'),
+              left: window.isMaximized ? 0 : (window.x !== undefined ? window.x : (window.innerWidth <= 768 ? 0 : '50%')),
+              top: window.isMaximized ? 0 : (window.y !== undefined ? window.y : (window.innerHeight <= 768 ? 0 : '50%')),
               width: window.isMaximized ? '100%' : (window.width || 1000) + 'px',
               height: window.isMaximized ? 'calc(100% - 40px)' : (window.height || 700) + 'px',
-              transform: window.isMaximized ? 'none' : (window.x ? 'none' : 'translate(-50%, -50%)')
+              transform: window.isMaximized ? 'none' : (window.x !== undefined || window.innerWidth <= 768 ? 'none' : 'translate(-50%, -50%)')
             }}
             onMouseDown={(e) => handleMouseDown(e, window.id)}
           >

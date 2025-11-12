@@ -24,8 +24,11 @@ const WindowsXPDesktop = () => {
   const [shutdownConfirm, setShutdownConfirm] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [editValue, setEditValue] = useState('');
+  const [selectedIcons, setSelectedIcons] = useState(new Set());
+  const [selectionBox, setSelectionBox] = useState(null);
   const dragState = useRef({ isDragging: false, windowId: null, offsetX: 0, offsetY: 0 });
   const iconDragState = useRef({ isDragging: false, iconId: null, offsetX: 0, offsetY: 0, hasMoved: false });
+  const selectionState = useRef({ isSelecting: false, startX: 0, startY: 0 });
 
   const openWindow = (id, title, content) => {
     // Special handling for portfolio - open as fullscreen book
@@ -625,11 +628,94 @@ const WindowsXPDesktop = () => {
       {/* Desktop Background */}
       <div 
         className="desktop-background"
-        onClick={() => {
+        onMouseDown={(e) => {
+          // Only start selection if clicking on desktop (not on an icon)
+          if (e.target.classList.contains('desktop-background') || e.target.closest('.desktop-icon') === null) {
+            const desktopRect = e.currentTarget.getBoundingClientRect();
+            const startX = e.clientX - desktopRect.left;
+            const startY = e.clientY - desktopRect.top;
+            
+            selectionState.current = {
+              isSelecting: true,
+              startX,
+              startY
+            };
+            
+            setSelectionBox({
+              x: startX,
+              y: startY,
+              width: 0,
+              height: 0
+            });
+            
+            // Clear selection if not holding Ctrl/Cmd
+            if (!e.ctrlKey && !e.metaKey) {
+              setSelectedIcons(new Set());
+            }
+          }
+        }}
+        onMouseMove={(e) => {
+          if (selectionState.current.isSelecting) {
+            const desktopRect = e.currentTarget.getBoundingClientRect();
+            const currentX = e.clientX - desktopRect.left;
+            const currentY = e.clientY - desktopRect.top;
+            
+            const startX = selectionState.current.startX;
+            const startY = selectionState.current.startY;
+            
+            const left = Math.min(startX, currentX);
+            const top = Math.min(startY, currentY);
+            const width = Math.abs(currentX - startX);
+            const height = Math.abs(currentY - startY);
+            
+            setSelectionBox({ x: left, y: top, width, height });
+            
+            // Find icons within selection box
+            const selected = new Set(selectedIcons);
+            const allIcons = document.querySelectorAll('.desktop-icon');
+            
+            allIcons.forEach(icon => {
+              const iconRect = icon.getBoundingClientRect();
+              const iconLeft = iconRect.left - desktopRect.left;
+              const iconTop = iconRect.top - desktopRect.top;
+              const iconRight = iconLeft + iconRect.width;
+              const iconBottom = iconTop + iconRect.height;
+              
+              const boxRight = left + width;
+              const boxBottom = top + height;
+              
+              // Check if icon overlaps with selection box
+              if (iconLeft < boxRight && iconRight > left && iconTop < boxBottom && iconBottom > top) {
+                const iconId = icon.getAttribute('data-icon-id');
+                if (iconId) {
+                  selected.add(iconId);
+                }
+              } else {
+                const iconId = icon.getAttribute('data-icon-id');
+                if (iconId && !e.ctrlKey && !e.metaKey) {
+                  selected.delete(iconId);
+                }
+              }
+            });
+            
+            setSelectedIcons(selected);
+          }
+        }}
+        onMouseUp={(e) => {
+          if (selectionState.current.isSelecting) {
+            selectionState.current.isSelecting = false;
+            setSelectionBox(null);
+          }
+        }}
+        onClick={(e) => {
           setStartMenuOpen(false);
           setContextMenu(null);
           if (editingItem) {
             handleEditCancel();
+          }
+          // Clear selection on click (unless Ctrl/Cmd is held or we just finished selecting)
+          if (!e.ctrlKey && !e.metaKey && !selectionState.current.isSelecting) {
+            setSelectedIcons(new Set());
           }
         }}
         onContextMenu={(e) => handleContextMenu(e)}
@@ -646,16 +732,49 @@ const WindowsXPDesktop = () => {
       >
         {/* Desktop Icons */}
         <div className="desktop-icons">
+          {/* Selection Box */}
+          {selectionBox && (
+            <div
+              className="selection-box"
+              style={{
+                position: 'absolute',
+                left: selectionBox.x,
+                top: selectionBox.y,
+                width: selectionBox.width,
+                height: selectionBox.height,
+                border: '1px dashed #316ac5',
+                backgroundColor: 'rgba(49, 106, 197, 0.1)',
+                pointerEvents: 'none',
+                zIndex: 1000
+              }}
+            />
+          )}
+
           {/* Portfolio Book Icon */}
           <div 
-            className="desktop-icon"
+            className={`desktop-icon ${selectedIcons.has('portfolio') ? 'selected' : ''}`}
             data-icon-id="portfolio"
             style={{
               position: 'absolute',
               left: iconPositions.portfolio?.x || 20,
               top: iconPositions.portfolio?.y || 20
             }}
-            onMouseDown={(e) => handleIconMouseDown(e, 'portfolio')}
+            onMouseDown={(e) => {
+              if (!e.ctrlKey && !e.metaKey) {
+                setSelectedIcons(new Set(['portfolio']));
+              } else {
+                setSelectedIcons(prev => {
+                  const next = new Set(prev);
+                  if (next.has('portfolio')) {
+                    next.delete('portfolio');
+                  } else {
+                    next.add('portfolio');
+                  }
+                  return next;
+                });
+              }
+              handleIconMouseDown(e, 'portfolio');
+            }}
             onDoubleClick={(e) => handleIconDoubleClick(e, () => openWindow('portfolio', 'My Portfolio - CV', null))}
           >
             <div className="icon-image book-icon">📖</div>
@@ -666,14 +785,29 @@ const WindowsXPDesktop = () => {
           {projects.map(project => (
             <div
               key={project.id}
-              className="desktop-icon"
+              className={`desktop-icon ${selectedIcons.has(project.id) ? 'selected' : ''}`}
               data-icon-id={project.id}
               style={{
                 position: 'absolute',
                 left: iconPositions[project.id]?.x || 20,
                 top: iconPositions[project.id]?.y || (100 + (projects.indexOf(project) * 80))
               }}
-              onMouseDown={(e) => handleIconMouseDown(e, project.id)}
+              onMouseDown={(e) => {
+                if (!e.ctrlKey && !e.metaKey) {
+                  setSelectedIcons(new Set([project.id]));
+                } else {
+                  setSelectedIcons(prev => {
+                    const next = new Set(prev);
+                    if (next.has(project.id)) {
+                      next.delete(project.id);
+                    } else {
+                      next.add(project.id);
+                    }
+                    return next;
+                  });
+                }
+                handleIconMouseDown(e, project.id);
+              }}
               onDoubleClick={(e) => handleIconDoubleClick(e, () => {
                 if (project.type === 'game' || project.type === 'browser') {
                   openWindow(project.id, project.title, project.component);
@@ -693,9 +827,24 @@ const WindowsXPDesktop = () => {
           {desktopItems.map(item => (
             <div
               key={item.id}
-              className="desktop-icon"
+              className={`desktop-icon ${selectedIcons.has(item.id) ? 'selected' : ''}`}
               data-icon-id={item.id}
               draggable={editingItem !== item.id ? "true" : "false"}
+              onMouseDown={(e) => {
+                if (!e.ctrlKey && !e.metaKey) {
+                  setSelectedIcons(new Set([item.id]));
+                } else {
+                  setSelectedIcons(prev => {
+                    const next = new Set(prev);
+                    if (next.has(item.id)) {
+                      next.delete(item.id);
+                    } else {
+                      next.add(item.id);
+                    }
+                    return next;
+                  });
+                }
+              }}
               style={{
                 position: 'absolute',
                 left: iconPositions[item.id]?.x || item.x || 20,

@@ -65,6 +65,20 @@
   background-color: rgba(255, 255, 255, 0.2);
 }
 
+.desktop-icon.selected {
+  background-color: rgba(49, 106, 197, 0.3);
+  border: 1px dashed #316ac5;
+  border-radius: 2px;
+}
+
+.selection-box {
+  position: absolute;
+  border: 1px dashed #316ac5;
+  background-color: rgba(49, 106, 197, 0.1);
+  pointer-events: none;
+  z-index: 1000;
+}
+
 .icon-image {
   width: 48px;
   height: 48px;

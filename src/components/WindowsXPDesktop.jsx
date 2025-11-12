@@ -778,33 +778,6 @@ const WindowsXPDesktop = () => {
     setDeleteConfirm(null);
   };
 
-  // Auto-arrange icons function
-  const autoArrangeIcons = () => {
-    const gridSize = 100;
-    const startX = 20;
-    const startY = 20;
-    const desktopWidth = window.innerWidth;
-    const iconsPerRow = Math.floor((desktopWidth - 40) / gridSize);
-    
-    const allIcons = [
-      { id: 'portfolio', ...iconPositions.portfolio },
-      ...projects.map((p, idx) => ({ id: p.id, ...iconPositions[p.id] })),
-      ...desktopItems.map(item => ({ id: item.id, ...iconPositions[item.id] }))
-    ];
-    
-    const updatedPositions = {};
-    allIcons.forEach((icon, idx) => {
-      const row = Math.floor(idx / iconsPerRow);
-      const col = idx % iconsPerRow;
-      updatedPositions[icon.id] = {
-        x: startX + (col * gridSize),
-        y: startY + (row * gridSize)
-      };
-    });
-    
-    setIconPositions(updatedPositions);
-  };
-
   const projects = [
     { 
       id: 'rickmorty', 
@@ -842,6 +815,33 @@ const WindowsXPDesktop = () => {
       component: <Browser />
     },
   ];
+
+  // Auto-arrange icons function
+  const autoArrangeIcons = () => {
+    const gridSize = 100;
+    const startX = 20;
+    const startY = 20;
+    const desktopWidth = window.innerWidth;
+    const iconsPerRow = Math.floor((desktopWidth - 40) / gridSize);
+    
+    const allIcons = [
+      { id: 'portfolio', ...iconPositions.portfolio },
+      ...projects.map((p, idx) => ({ id: p.id, ...iconPositions[p.id] })),
+      ...desktopItems.map(item => ({ id: item.id, ...iconPositions[item.id] }))
+    ];
+    
+    const updatedPositions = {};
+    allIcons.forEach((icon, idx) => {
+      const row = Math.floor(idx / iconsPerRow);
+      const col = idx % iconsPerRow;
+      updatedPositions[icon.id] = {
+        x: startX + (col * gridSize),
+        y: startY + (row * gridSize)
+      };
+    });
+    
+    setIconPositions(updatedPositions);
+  };
 
   return (
     <div className="windows-xp-desktop">

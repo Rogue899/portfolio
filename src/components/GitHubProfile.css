@@ -1,0 +1,170 @@
+.github-profile {
+  width: 100%;
+  height: 100%;
+  background: #0d1117;
+  overflow-y: auto;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+  color: #c9d1d9;
+}
+
+.profile-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-size: 18px;
+  color: #8b949e;
+}
+
+.profile-header {
+  background: #161b22;
+  border-bottom: 1px solid #30363d;
+  padding: 40px 30px 30px;
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.profile-avatar {
+  flex-shrink: 0;
+}
+
+.profile-avatar img,
+.avatar-placeholder {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: 4px solid #30363d;
+}
+
+.avatar-placeholder {
+  background: #21262d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  font-weight: bold;
+  color: #58a6ff;
+}
+
+.profile-info {
+  flex: 1;
+}
+
+.profile-name {
+  font-size: 32px;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+  color: #c9d1d9;
+}
+
+.profile-username {
+  font-size: 20px;
+  color: #8b949e;
+  margin: 0 0 12px 0;
+}
+
+.profile-bio {
+  font-size: 16px;
+  color: #c9d1d9;
+  margin: 0 0 8px 0;
+  line-height: 1.5;
+}
+
+.profile-location,
+.profile-company {
+  font-size: 14px;
+  color: #8b949e;
+  margin: 4px 0;
+}
+
+.profile-stats {
+  background: #161b22;
+  border-bottom: 1px solid #30363d;
+  padding: 20px 30px;
+  display: flex;
+  gap: 30px;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stat-number {
+  font-size: 24px;
+  font-weight: 600;
+  color: #58a6ff;
+}
+
+.stat-label {
+  font-size: 14px;
+  color: #8b949e;
+}
+
+.profile-content {
+  padding: 30px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.profile-section {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  padding: 24px;
+  margin-bottom: 20px;
+}
+
+.profile-section h2 {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0 0 16px 0;
+  color: #c9d1d9;
+  border-bottom: 1px solid #30363d;
+  padding-bottom: 8px;
+}
+
+.profile-section p {
+  line-height: 1.6;
+  color: #8b949e;
+  margin: 0;
+}
+
+.tech-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tech-tag {
+  background: #21262d;
+  color: #58a6ff;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  border: 1px solid #30363d;
+}
+
+.profile-footer {
+  text-align: center;
+  padding: 20px;
+}
+
+.view-full-profile {
+  display: inline-block;
+  background: #238636;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.view-full-profile:hover {
+  background: #2ea043;
+}
+

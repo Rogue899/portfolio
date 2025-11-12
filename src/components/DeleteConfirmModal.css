@@ -1,0 +1,95 @@
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 20000;
+  font-family: 'Tahoma', 'MS Sans Serif', sans-serif;
+}
+
+.modal-content {
+  background: linear-gradient(to bottom, #ece9d8 0%, #d4d0c8 100%);
+  border: 2px outset #ece9d8;
+  box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.5);
+  min-width: 300px;
+  max-width: 400px;
+}
+
+.modal-header {
+  background: linear-gradient(to bottom, #245edb 0%, #1941a5 100%);
+  color: white;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 12px;
+}
+
+.modal-body {
+  padding: 20px;
+  font-size: 11px;
+  color: #333;
+}
+
+.modal-body p {
+  margin: 10px 0;
+}
+
+.modal-warning {
+  color: #d32f2f;
+  font-weight: bold;
+  font-size: 10px;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 8px 12px;
+  border-top: 1px solid #999;
+}
+
+.modal-button {
+  padding: 6px 16px;
+  border: 1px outset #ece9d8;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: bold;
+  font-family: 'Tahoma', 'MS Sans Serif', sans-serif;
+  min-width: 60px;
+}
+
+.modal-button-cancel {
+  background: linear-gradient(to bottom, #ece9d8 0%, #d4d0c8 100%);
+  color: #000;
+}
+
+.modal-button-cancel:hover {
+  background: linear-gradient(to bottom, #f5f2e5 0%, #e5e1d8 100%);
+}
+
+.modal-button-cancel:active {
+  border: 1px inset #ece9d8;
+}
+
+.modal-button-confirm {
+  background: linear-gradient(to bottom, #d32f2f 0%, #b71c1c 100%);
+  color: white;
+}
+
+.modal-button-confirm:hover {
+  background: linear-gradient(to bottom, #e53935 0%, #c62828 100%);
+}
+
+.modal-button-confirm:active {
+  border: 1px inset #ece9d8;
+}
+

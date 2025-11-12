@@ -1,0 +1,32 @@
+.context-menu {
+  position: fixed;
+  background: linear-gradient(to bottom, #ece9d8 0%, #d4d0c8 100%);
+  border: 2px outset #ece9d8;
+  box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.5);
+  z-index: 10000;
+  min-width: 150px;
+  font-family: 'Tahoma', 'MS Sans Serif', sans-serif;
+  font-size: 11px;
+}
+
+.context-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  cursor: pointer;
+  color: #000;
+  transition: background-color 0.1s;
+}
+
+.context-menu-item:hover {
+  background: linear-gradient(to bottom, #316ac5 0%, #245edb 100%);
+  color: white;
+}
+
+.context-menu-icon {
+  font-size: 14px;
+  width: 20px;
+  text-align: center;
+}
+

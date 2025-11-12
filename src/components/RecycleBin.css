@@ -1,0 +1,44 @@
+.recycle-bin {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 80px;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 2px;
+  transition: all 0.2s;
+  user-select: none;
+  position: relative;
+}
+
+.recycle-bin:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.recycle-bin.dragging-over {
+  background-color: rgba(255, 0, 0, 0.3);
+  transform: scale(1.1);
+}
+
+.recycle-bin-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  margin-bottom: 5px;
+  filter: drop-shadow(2px 2px 2px rgba(0, 0, 0, 0.3));
+}
+
+.recycle-bin-label {
+  color: white;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+  font-size: 11px;
+  text-align: center;
+  word-break: break-word;
+  line-height: 1.2;
+  max-width: 80px;
+  font-family: 'Tahoma', 'MS Sans Serif', sans-serif;
+}
+

@@ -1,0 +1,508 @@
+.portfolio-book-fullscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: 
+    linear-gradient(135deg, #2d4a5e 0%, #1a3a4a 25%, #0f2d3d 50%, #1a3a4a 75%, #2d4a5e 100%),
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 20px,
+      rgba(0, 0, 0, 0.1) 20px,
+      rgba(0, 0, 0, 0.1) 40px
+    ),
+    radial-gradient(circle at 30% 40%, rgba(100, 200, 255, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 70% 60%, rgba(150, 255, 200, 0.1) 0%, transparent 50%);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.book-close-button {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10001;
+  transition: all 0.2s;
+}
+
+.book-close-button:hover {
+  background: rgba(255, 0, 0, 0.8);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: scale(1.1);
+}
+
+.portfolio-book-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.portfolio-book-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 50%, rgba(100, 200, 255, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 80% 50%, rgba(150, 255, 200, 0.15) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.portfolio-book {
+  margin: 20px 0;
+  filter: drop-shadow(10px 10px 20px rgba(0, 0, 0, 0.5));
+  position: relative;
+  z-index: 1;
+}
+
+.demoPage {
+  background: #fff;
+  padding: 40px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Georgia', 'Times New Roman', serif;
+  color: #2c2c2c;
+}
+
+.demoPage h1 {
+  font-size: 2.5em;
+  margin-bottom: 10px;
+  color: #2c3e50;
+  border-bottom: 3px solid #3498db;
+  padding-bottom: 10px;
+}
+
+.demoPage h2 {
+  font-size: 1.8em;
+  margin-top: 30px;
+  margin-bottom: 20px;
+  color: #34495e;
+}
+
+.demoPage h3 {
+  font-size: 1.3em;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  color: #2c3e50;
+}
+
+.demoPage .section {
+  margin-bottom: 25px;
+}
+
+.demoPage p {
+  line-height: 1.6;
+  margin-bottom: 10px;
+  font-size: 1em;
+}
+
+.demoPage ul {
+  line-height: 1.8;
+  padding-left: 20px;
+}
+
+.demoPage li {
+  margin-bottom: 8px;
+}
+
+/* Page and PageCover styles - Retro Look */
+.page {
+  background: 
+    linear-gradient(to right, #f5f0e8 0%, #fffef9 5%, #fffef9 95%, #f5f0e8 100%),
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 24px,
+      rgba(200, 180, 160, 0.15) 24px,
+      rgba(200, 180, 160, 0.15) 25px
+    );
+  padding: 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Courier New', 'Monaco', 'Consolas', monospace;
+  color: #2c2c2c;
+  position: relative;
+  box-shadow: 
+    inset 2px 0 5px rgba(0, 0, 0, 0.1),
+    0 0 15px rgba(0, 0, 0, 0.2);
+  border-left: 1px solid rgba(0, 0, 0, 0.1);
+  border-right: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Ensure proper page structure and direction */
+.page {
+  direction: ltr;
+  text-align: left;
+}
+
+.page-cover {
+  background: 
+    linear-gradient(135deg, #2d4a5e 0%, #1a3a4a 25%, #0f2d3d 50%, #1a3a4a 75%, #2d4a5e 100%),
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 10px,
+      rgba(0, 0, 0, 0.15) 10px,
+      rgba(0, 0, 0, 0.15) 20px
+    ),
+    radial-gradient(circle at center, rgba(100, 200, 255, 0.1) 0%, transparent 70%);
+  color: #e0f4ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 
+    inset 0 0 30px rgba(0, 0, 0, 0.4),
+    0 0 20px rgba(0, 0, 0, 0.5);
+  border: 3px solid #6b5d4f;
+}
+
+.page-content {
+  padding: 40px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* Add spacing on inner edges of pages to create visual gap */
+.page[data-density="soft"] .page-content {
+  padding-right: 50px;
+  border-right: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* Create visual separation - this will be handled by the library's spread view */
+.page[data-density="soft"] + .page[data-density="soft"] .page-content {
+  padding-left: 50px;
+  padding-right: 40px;
+  border-left: 1px solid rgba(0, 0, 0, 0.05);
+  border-right: none;
+}
+
+.page-cover .page-content {
+  align-items: center;
+  justify-content: center;
+}
+
+.page-cover h2 {
+  font-size: 3em;
+  text-align: center;
+  margin: 0;
+  text-shadow: 
+    3px 3px 6px rgba(0, 0, 0, 0.5),
+    1px 1px 2px rgba(0, 0, 0, 0.7);
+  font-family: 'Georgia', 'Times New Roman', serif;
+  letter-spacing: 3px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.page-header {
+  font-size: 1.5em;
+  margin-bottom: 20px;
+  color: #34495e;
+  border-bottom: 2px solid #3498db;
+  padding-bottom: 10px;
+}
+
+.page-image {
+  width: 100%;
+  height: 200px;
+  background: linear-gradient(135deg, #e0e0e0 0%, #f5f5f5 100%);
+  margin: 20px 0;
+  border-radius: 4px;
+}
+
+.page-text {
+  flex: 1;
+  line-height: 1.8;
+  font-size: 1em;
+}
+
+.page-footer {
+  margin-top: auto;
+  padding-top: 20px;
+  text-align: center;
+  color: #7f8c8d;
+  font-size: 0.9em;
+  border-top: 1px solid #e0e0e0;
+}
+
+.demo-book {
+  margin: 20px 0;
+  filter: drop-shadow(10px 10px 20px rgba(0, 0, 0, 0.5));
+  position: relative;
+  z-index: 1;
+}
+
+/* Ensure proper page direction */
+.demo-book {
+  direction: ltr;
+}
+
+/* Add visual spacing between pages */
+.demo-book .page {
+  margin: 0 10px;
+}
+
+.book-controls-container {
+  margin-top: 20px;
+  padding: 15px;
+  background: linear-gradient(to bottom, #ece9d8 0%, #d4d0c8 100%);
+  border: 2px outset #ece9d8;
+  border-radius: 4px;
+  box-shadow: 
+    0 2px 10px rgba(0, 0, 0, 0.3),
+    inset 1px 1px 0 rgba(255, 255, 255, 0.5);
+  z-index: 1;
+  position: relative;
+  font-family: 'Courier New', 'Monaco', 'Consolas', monospace;
+  font-size: 12px;
+}
+
+.book-controls-container > div {
+  margin: 10px 0;
+  text-align: center;
+}
+
+.book-controls-container button {
+  background: linear-gradient(to bottom, #ece9d8 0%, #d4d0c8 100%);
+  border: 2px outset #ece9d8;
+  color: #1a1a1a;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: bold;
+  font-family: 'Courier New', 'Monaco', 'Consolas', monospace;
+  margin: 0 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.book-controls-container button:hover {
+  background: linear-gradient(to bottom, #f5f2e5 0%, #e5e1d8 100%);
+}
+
+.book-controls-container button:active {
+  border: 2px inset #ece9d8;
+  background: linear-gradient(to bottom, #d4d0c8 0%, #c4c0b8 100%);
+}
+
+.book-controls-container span {
+  margin: 0 5px;
+  font-weight: bold;
+}
+
+.book-controls-container i {
+  color: #666;
+}
+
+/* CV Content Styles - Retro Look */
+.cv-section {
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  font-family: 'Courier New', 'Monaco', 'Consolas', monospace;
+}
+
+.cv-name {
+  font-size: 2.5em;
+  margin-bottom: 15px;
+  color: #1a1a1a;
+  border-bottom: 4px double #8b7355;
+  padding-bottom: 10px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-family: 'Georgia', 'Times New Roman', serif;
+}
+
+.cv-contact {
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 2px dotted #8b7355;
+}
+
+.cv-contact p {
+  margin: 8px 0;
+  font-size: 0.95em;
+  line-height: 1.6;
+}
+
+.cv-contact a {
+  color: #6b5d4f;
+  text-decoration: underline;
+  text-decoration-style: dotted;
+}
+
+.cv-contact a:hover {
+  color: #8b7355;
+  text-decoration-style: solid;
+}
+
+.cv-section-title {
+  font-size: 1.8em;
+  margin-top: 25px;
+  margin-bottom: 15px;
+  color: #4a3728;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  border-bottom: 3px double #8b7355;
+  padding-bottom: 8px;
+  font-weight: bold;
+  font-family: 'Georgia', 'Times New Roman', serif;
+}
+
+.cv-subsection-title {
+  font-size: 1.3em;
+  margin-top: 20px;
+  margin-bottom: 12px;
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+.cv-list {
+  list-style: none;
+  padding-left: 0;
+  margin: 15px 0;
+}
+
+.cv-list li {
+  margin-bottom: 10px;
+  line-height: 1.7;
+  font-size: 0.95em;
+  padding-left: 20px;
+  position: relative;
+}
+
+.cv-list li::before {
+  content: "▶";
+  position: absolute;
+  left: 0;
+  color: #8b7355;
+  font-weight: bold;
+  font-size: 0.8em;
+}
+
+.cv-job {
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 2px dotted #8b7355;
+}
+
+.cv-job:last-child {
+  border-bottom: none;
+}
+
+.cv-job-header {
+  margin-bottom: 12px;
+}
+
+.cv-job-title {
+  font-size: 1.4em;
+  margin-bottom: 5px;
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+.cv-job-role {
+  font-size: 1.1em;
+  color: #7f8c8d;
+  font-style: italic;
+  margin: 5px 0;
+}
+
+.cv-job-duties {
+  list-style: none;
+  padding-left: 0;
+  margin-top: 12px;
+}
+
+.cv-job-duties li {
+  margin-bottom: 8px;
+  line-height: 1.7;
+  font-size: 0.95em;
+  padding-left: 20px;
+  position: relative;
+}
+
+.cv-job-duties li::before {
+  content: "▸";
+  position: absolute;
+  left: 0;
+  color: #8b7355;
+  font-size: 0.9em;
+  font-weight: bold;
+}
+
+.cv-education {
+  margin-bottom: 25px;
+}
+
+.cv-education-institution {
+  font-size: 1.3em;
+  margin-bottom: 8px;
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+.cv-education-degree {
+  font-size: 1.05em;
+  margin: 5px 0;
+  color: #34495e;
+}
+
+.cv-education-minor {
+  font-size: 0.95em;
+  margin: 5px 0;
+  color: #7f8c8d;
+  font-style: italic;
+}
+
+.cv-certification {
+  margin-top: 15px;
+}
+
+.cv-certification p {
+  margin: 8px 0;
+  line-height: 1.7;
+}
+
+.cv-certification a {
+  color: #6b5d4f;
+  text-decoration: underline;
+  text-decoration-style: dotted;
+}
+
+.cv-certification a:hover {
+  color: #8b7355;
+  text-decoration-style: solid;
+}
+
+

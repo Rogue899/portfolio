@@ -39,6 +39,91 @@ const PortfolioBook = ({ onClose }) => {
     // State change handler
   };
 
+  const handleDownloadCV = () => {
+    // Generate CV text content
+    const cvContent = `TAREK ROUKOS
+================
+
+CONTACT INFORMATION
+------------------
+Phone: +961 70 514 899
+Email: tarek.roukos@lau.edu
+LinkedIn: https://www.linkedin.com/in/tarek-roukos-60058a9b
+
+SKILLS
+------
+Engineering & Development
+- Languages: JavaScript (ES6+), TypeScript, C#
+- Frameworks & Libraries: React.js (Hooks, Context API, Class Components), Angular.js (v1), Angular (v12+), Material UI, Tailwind CSS, GSAP, Three.js, Redux, LocalForage, IndexedDB
+- Infrastructure & APIs: RESTful APIs, GraphQL (Apollo Client), Docker, Kubernetes, Elasticsearch, WebSockets (Pusher)
+- Architecture & Design Patterns: Component-based architecture, Reusable component development, Service Layer, Singleton, Mediator
+- CMS & Platforms: SharePoint, Akumina, Skwid CMS (C#, MVC, View Components, Sass), Electron
+- Version Control & Tools: Git (branching, merging, rebasing), NPM, PNPM, Yarn, Axios
+- Databases: PostgreSQL, MySQL, SQL Server
+- Operating Systems: Linux, Windows
+- Agile Methodologies: SCRUM
+
+General
+- Languages: Fluent in English and Arabic, Beginner in French
+
+EXPERIENCE
+---------
+
+Born Interactive – Beirut, Lebanon
+Senior Web Developer (2025–Present)
+- Lead development of enterprise-grade web solutions using SharePoint and Akumina, building custom widgets and components.
+- Engineered dynamic front-end features using React (Hooks and Class Components), JavaScript, and CSS.
+- Developed and maintained CMS-driven applications using Skwid (C#, MVC, View Components, Sass).
+- Provided ongoing client and application support, resolving bugs and deploying system updates.
+- Collaborated with cross-functional teams to ensure seamless integration between CMS platforms and SharePoint.
+- Participated in code reviews, performance tuning, and legacy system modernization.
+- Worked in fast-paced environments with both small agile teams and larger cross-functional groups.
+
+SerVme – Beirut, Lebanon
+Software Engineer Level 2 (2021–2025)
+- Migrated legacy AngularJS codebase to React, modernizing UI/UX and improving maintainability.
+- Developed and maintained dashboards and reporting tools, integrating RESTful and GraphQL APIs.
+- Integrated WhatsApp Business API for automated reservation notifications and customer engagement.
+- Implemented WebSockets for real-time updates, managing application state via Redux.
+- Built reusable UI components (tables, pagination, layout containers) with conditional rendering logic.
+- Enabled offline capabilities using LocalForage and IndexedDB for persistent client-side caching.
+- Led feature estimation, PRD review, and collaborated with QA and design teams to ensure delivery quality.
+- Maintained legacy systems while progressively transitioning to modern frameworks and architecture.
+- Operated in high-velocity development cycles, adapting to evolving requirements and team structures.
+
+CME – Beirut, Lebanon
+Junior Software Engineer (2019–2020)
+- Developed RESTful APIs using C# with EF Core (Code First), implementing secure authentication via Identity Server.
+- Applied Mediator pattern and LINQ for efficient data querying and transformation.
+- Built React-based portals and desktop applications (Electron), managing global state with Context API.
+- Designed and implemented reusable components and feature flags for scalable development.
+- Contributed to UI/UX design decisions and collaborated on portal and desktop app styling using Material UI.
+- Participated in architectural decisions and design implementation discussions.
+
+EDUCATION
+---------
+Lebanese American University
+Bachelor's in Management Information Systems (2013–2018)
+Minor in Computer Science
+
+CERTIFICATIONS
+--------------
+HackerRank Problem Solving Certificate
+https://www.hackerrank.com/certificates/93f72b72b7e6
+`;
+
+    // Create blob and download
+    const blob = new Blob([cvContent], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'Tarek_Roukos_CV.txt';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   useEffect(() => {
     // Try to get page count after book is initialized
     const timer = setTimeout(() => {
@@ -62,6 +147,9 @@ const PortfolioBook = ({ onClose }) => {
   return (
     <div className="portfolio-book-fullscreen">
       <button className="book-close-button" onClick={onClose}>×</button>
+      <button className="book-download-button" onClick={handleDownloadCV} title="Download CV">
+        ⬇️ Download CV
+      </button>
       <div className="portfolio-book-container">
         <HTMLFlipBook
           width={550}

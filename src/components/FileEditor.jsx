@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import NotificationModal from './NotificationModal';
 import './FileEditor.css';
 
 const FileEditor = ({ fileId, fileName, onClose, onSave }) => {
@@ -6,6 +7,7 @@ const FileEditor = ({ fileId, fileName, onClose, onSave }) => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
+  const [notification, setNotification] = useState(null);
 
   useEffect(() => {
     // Load file content from backend
@@ -64,11 +66,20 @@ const FileEditor = ({ fileId, fileName, onClose, onSave }) => {
       
       setHasChanges(false);
       setSaving(false);
+      setNotification({
+        title: 'Success',
+        message: 'File saved successfully!',
+        type: 'success'
+      });
       if (onSave) onSave();
     } catch (error) {
       console.error('Error saving file:', error);
       setSaving(false);
-      alert('Failed to save file. Please try again.');
+      setNotification({
+        title: 'Error',
+        message: 'Failed to save file. Please try again.',
+        type: 'error'
+      });
     }
   };
 
@@ -81,33 +92,43 @@ const FileEditor = ({ fileId, fileName, onClose, onSave }) => {
   }
 
   return (
-    <div className="file-editor">
-      <div className="editor-toolbar">
-        <div className="editor-title">
-          <span className="editor-icon">📄</span>
-          <span>{fileName}</span>
+    <>
+      <div className="file-editor">
+        <div className="editor-toolbar">
+          <div className="editor-title">
+            <span className="editor-icon">📄</span>
+            <span>{fileName}</span>
+          </div>
+          <div className="editor-actions">
+            {hasChanges && <span className="unsaved-indicator">●</span>}
+            <button 
+              className="editor-save-btn" 
+              onClick={handleSave}
+              disabled={saving || !hasChanges}
+            >
+              {saving ? 'Saving...' : 'Save'}
+            </button>
+          </div>
         </div>
-        <div className="editor-actions">
-          {hasChanges && <span className="unsaved-indicator">●</span>}
-          <button 
-            className="editor-save-btn" 
-            onClick={handleSave}
-            disabled={saving || !hasChanges}
-          >
-            {saving ? 'Saving...' : 'Save'}
-          </button>
+        <div className="editor-content">
+          <textarea
+            className="editor-textarea"
+            value={content}
+            onChange={handleContentChange}
+            placeholder="Start typing..."
+            spellCheck={false}
+          />
         </div>
       </div>
-      <div className="editor-content">
-        <textarea
-          className="editor-textarea"
-          value={content}
-          onChange={handleContentChange}
-          placeholder="Start typing..."
-          spellCheck={false}
+      {notification && (
+        <NotificationModal
+          title={notification.title}
+          message={notification.message}
+          type={notification.type}
+          onClose={() => setNotification(null)}
         />
-      </div>
-    </div>
+      )}
+    </>
   );
 };
 

@@ -1,0 +1,115 @@
+.notification-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 20000;
+}
+
+.notification-modal {
+  background: #ece9d8;
+  border: 2px outset #ece9d8;
+  box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.5);
+  width: 400px;
+  font-family: 'Tahoma', 'MS Sans Serif', sans-serif;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-titlebar {
+  background: linear-gradient(to bottom, #245edb 0%, #1941a5 100%);
+  color: white;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: bold;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-titlebar.error {
+  background: linear-gradient(to bottom, #d32f2f 0%, #b71c1c 100%);
+}
+
+.modal-titlebar.success {
+  background: linear-gradient(to bottom, #388e3c 0%, #2e7d32 100%);
+}
+
+.modal-title {
+  flex: 1;
+}
+
+.modal-close-btn {
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 0;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.modal-close-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.modal-content {
+  padding: 20px;
+  text-align: center;
+  color: #333;
+  font-size: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+.modal-icon {
+  font-size: 48px;
+}
+
+.modal-content p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.modal-button {
+  background: linear-gradient(to bottom, #ece9d8 0%, #d4d0c8 100%);
+  border: 1px outset #ece9d8;
+  padding: 6px 18px;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: bold;
+  font-family: 'Tahoma', 'MS Sans Serif', sans-serif;
+  color: #000;
+  min-width: 80px;
+}
+
+.modal-button:hover {
+  background: linear-gradient(to bottom, #f5f2e5 0%, #e5e1d8 100%);
+}
+
+.modal-button:active {
+  border: 1px inset #ece9d8;
+  background: linear-gradient(to bottom, #d4d0c8 0%, #c4c0b8 100%);
+}
+

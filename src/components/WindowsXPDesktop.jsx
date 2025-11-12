@@ -9,6 +9,7 @@ import Pong from './Pong';
 import RecycleBin from './RecycleBin';
 import Browser from './Browser';
 import DeleteConfirmModal from './DeleteConfirmModal';
+import NotificationModal from './NotificationModal';
 
 const WindowsXPDesktop = () => {
   const [openWindows, setOpenWindows] = useState([]);
@@ -19,6 +20,8 @@ const WindowsXPDesktop = () => {
   const [desktopItems, setDesktopItems] = useState([]);
   const [isBookOpen, setIsBookOpen] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [notification, setNotification] = useState(null);
+  const [shutdownConfirm, setShutdownConfirm] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [editValue, setEditValue] = useState('');
   const dragState = useRef({ isDragging: false, windowId: null, offsetX: 0, offsetY: 0 });
@@ -167,13 +170,26 @@ const WindowsXPDesktop = () => {
   };
 
   const handleShutdown = () => {
-    if (window.confirm('Are you sure you want to shut down?')) {
-      window.close();
-      // If window.close() doesn't work (some browsers block it), show a message
+    setShutdownConfirm(true);
+  };
+
+  const confirmShutdown = () => {
+    setShutdownConfirm(false);
+    window.close();
+    // If window.close() doesn't work (some browsers block it), show a message
+    setTimeout(() => {
       if (!document.hidden) {
-        alert('Please close this tab/window manually.');
+        setNotification({
+          title: 'Information',
+          message: 'Please close this tab/window manually.',
+          type: 'info'
+        });
       }
-    }
+    }, 100);
+  };
+
+  const cancelShutdown = () => {
+    setShutdownConfirm(false);
   };
 
   // Update clock every second
@@ -939,6 +955,25 @@ const WindowsXPDesktop = () => {
           itemName={deleteConfirm.itemName}
           onConfirm={confirmDelete}
           onCancel={cancelDelete}
+        />
+      )}
+
+      {/* Shutdown Confirmation Modal */}
+      {shutdownConfirm && (
+        <DeleteConfirmModal
+          itemName="the computer"
+          onConfirm={confirmShutdown}
+          onCancel={cancelShutdown}
+        />
+      )}
+
+      {/* Notification Modal */}
+      {notification && (
+        <NotificationModal
+          title={notification.title}
+          message={notification.message}
+          type={notification.type}
+          onClose={() => setNotification(null)}
         />
       )}
     </div>

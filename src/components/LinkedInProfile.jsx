@@ -59,7 +59,8 @@ const LinkedInProfile = () => {
               location: 'Lebanon'
             }
           ],
-          skills: ['TypeScript', 'React.js', 'JavaScript', 'AngularJS', 'Angular', 'Node.js', 'Leadership', 'Android Development', 'Reactjs', 'Full Stack Development']
+          skills: ['TypeScript', 'React.js', 'JavaScript', 'AngularJS', 'Angular', 'Node.js', 'Leadership', 'Android Development', 'Reactjs', 'Full Stack Development'],
+          portfolioUrl: 'https://portfolio-rouge899.vercel.app'
         });
         setLoading(false);
       });
@@ -90,6 +91,11 @@ const LinkedInProfile = () => {
         <div className="profile-section">
           <h2>About</h2>
           <p>{profileData.summary}</p>
+          {profileData.portfolioUrl && (
+            <p style={{ marginTop: '12px' }}>
+              Check out my <a href={profileData.portfolioUrl} target="_blank" rel="noopener noreferrer" className="portfolio-link">portfolio</a> to see my work and projects.
+            </p>
+          )}
         </div>
 
         <div className="profile-section">

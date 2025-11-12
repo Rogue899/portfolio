@@ -23,6 +23,7 @@ export default async function handler(req, res) {
       headline: 'Senior Software Engineer',
       location: 'Beirut, Lebanon',
       profileUrl: 'https://www.linkedin.com/in/tarek-roukos-60058a9b',
+      portfolioUrl: 'https://portfolio-rouge899.vercel.app',
       summary: 'Software Engineer with over 3 years of experience at SerVme (fully remote), specializing in front-end development using AngularJS and React. Skilled in managing and implementing complex features, debugging, and enhancing performance in large-scale applications.',
       experience: [
         {

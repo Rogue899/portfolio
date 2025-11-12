@@ -94,6 +94,19 @@
   margin: 0 0 12px 0;
 }
 
+.portfolio-link {
+  color: #58a6ff;
+  text-decoration: none;
+  font-weight: 500;
+  border-bottom: 1px dotted #58a6ff;
+  transition: color 0.2s;
+}
+
+.portfolio-link:hover {
+  color: #79c0ff;
+  border-bottom-color: #79c0ff;
+}
+
 .experience-item {
   padding: 16px 0;
   border-bottom: 1px solid #30363d;

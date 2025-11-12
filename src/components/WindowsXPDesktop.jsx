@@ -961,7 +961,10 @@ const WindowsXPDesktop = () => {
       {/* Shutdown Confirmation Modal */}
       {shutdownConfirm && (
         <DeleteConfirmModal
-          itemName="the computer"
+          itemName=""
+          title="Shut Down"
+          message="Are you sure you want to shut down?"
+          warning=""
           onConfirm={confirmShutdown}
           onCancel={cancelShutdown}
         />

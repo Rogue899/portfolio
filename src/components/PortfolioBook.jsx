@@ -62,6 +62,7 @@ Engineering & Development
 - Databases: PostgreSQL, MySQL, SQL Server
 - Operating Systems: Linux, Windows
 - Agile Methodologies: SCRUM
+- Additional: Android Development, Full Stack Development, Leadership
 
 General
 - Languages: Fluent in English and Arabic, Beginner in French
@@ -70,7 +71,7 @@ EXPERIENCE
 ---------
 
 Born Interactive – Beirut, Lebanon
-Senior Web Developer (2025–Present)
+Senior Software Engineer (Apr 2025 - Present · 8 mos) · On-site
 - Lead development of enterprise-grade web solutions using SharePoint and Akumina, building custom widgets and components.
 - Engineered dynamic front-end features using React (Hooks and Class Components), JavaScript, and CSS.
 - Developed and maintained CMS-driven applications using Skwid (C#, MVC, View Components, Sass).
@@ -79,8 +80,9 @@ Senior Web Developer (2025–Present)
 - Participated in code reviews, performance tuning, and legacy system modernization.
 - Worked in fast-paced environments with both small agile teams and larger cross-functional groups.
 
-SerVme – Beirut, Lebanon
-Software Engineer Level 2 (2021–2025)
+serVme – Lebanon
+Software Engineer lvl 2 (May 2021 - Jan 2025 · 3 yrs 9 mos) · Remote
+- Software Engineer with over 3 years of experience specializing in front-end development using AngularJS and React.
 - Migrated legacy AngularJS codebase to React, modernizing UI/UX and improving maintainability.
 - Developed and maintained dashboards and reporting tools, integrating RESTful and GraphQL APIs.
 - Integrated WhatsApp Business API for automated reservation notifications and customer engagement.
@@ -91,8 +93,13 @@ Software Engineer Level 2 (2021–2025)
 - Maintained legacy systems while progressively transitioning to modern frameworks and architecture.
 - Operated in high-velocity development cycles, adapting to evolving requirements and team structures.
 
-CME – Beirut, Lebanon
-Junior Software Engineer (2019–2020)
+Lemonade Fashion
+Full Stack Engineer (Mar 2021 - Sep 2021 · 7 mos) · Contract
+- Developed full-stack applications using React.js and Android Development.
+- Worked on cross-platform solutions and mobile application development.
+
+CME Offshore sal – Lebanon
+Software Engineer (Dec 2019 - Dec 2020 · 1 yr 1 mo)
 - Developed RESTful APIs using C# with EF Core (Code First), implementing secure authentication via Identity Server.
 - Applied Mediator pattern and LINQ for efficient data querying and transformation.
 - Built React-based portals and desktop applications (Electron), managing global state with Context API.
@@ -220,7 +227,7 @@ https://www.hackerrank.com/certificates/93f72b72b7e6
               <div className="cv-job">
                 <div className="cv-job-header">
                   <h3 className="cv-job-title">Born Interactive – Beirut, Lebanon</h3>
-                  <p className="cv-job-role">Senior Web Developer (2025–Present)</p>
+                  <p className="cv-job-role">Senior Software Engineer (Apr 2025 - Present · 8 mos) · On-site</p>
                 </div>
                 <ul className="cv-job-duties">
                   <li>Lead development of enterprise-grade web solutions using SharePoint and Akumina, building custom widgets and components.</li>
@@ -240,32 +247,44 @@ https://www.hackerrank.com/certificates/93f72b72b7e6
             <div className="cv-section">
               <div className="cv-job">
                 <div className="cv-job-header">
-                  <h3 className="cv-job-title">SerVme – Beirut, Lebanon</h3>
-                  <p className="cv-job-role">Software Engineer Level 2 (2021–2025)</p>
+                  <h3 className="cv-job-title">serVme – Lebanon</h3>
+                  <p className="cv-job-role">Software Engineer lvl 2 (May 2021 - Jan 2025 · 3 yrs 9 mos) · Remote</p>
                 </div>
                 <ul className="cv-job-duties">
+                  <li>Software Engineer with over 3 years of experience specializing in front-end development using AngularJS and React.</li>
                   <li>Migrated legacy AngularJS codebase to React, modernizing UI/UX and improving maintainability.</li>
                   <li>Developed and maintained dashboards and reporting tools, integrating RESTful and GraphQL APIs.</li>
                   <li>Integrated WhatsApp Business API for automated reservation notifications and customer engagement.</li>
                   <li>Implemented WebSockets for real-time updates, managing application state via Redux.</li>
-                  <li>Built reusable UI components (tables, pagination, layout containers) with conditional rendering logic.</li>
                 </ul>
               </div>
             </div>
           </Page>
 
-          {/* Page 5: Experience - SerVme Part 2 */}
+          {/* Page 5: Experience - SerVme Part 2 & Lemonade Fashion */}
           <Page>
             <div className="cv-section">
               <div className="cv-job">
                 <div className="cv-job-header">
-                  <h3 className="cv-job-title">SerVme – Beirut, Lebanon (continued)</h3>
+                  <h3 className="cv-job-title">serVme – Lebanon (continued)</h3>
                 </div>
                 <ul className="cv-job-duties">
+                  <li>Built reusable UI components (tables, pagination, layout containers) with conditional rendering logic.</li>
                   <li>Enabled offline capabilities using LocalForage and IndexedDB for persistent client-side caching.</li>
                   <li>Led feature estimation, PRD review, and collaborated with QA and design teams to ensure delivery quality.</li>
                   <li>Maintained legacy systems while progressively transitioning to modern frameworks and architecture.</li>
                   <li>Operated in high-velocity development cycles, adapting to evolving requirements and team structures.</li>
+                </ul>
+              </div>
+
+              <div className="cv-job">
+                <div className="cv-job-header">
+                  <h3 className="cv-job-title">Lemonade Fashion</h3>
+                  <p className="cv-job-role">Full Stack Engineer (Mar 2021 - Sep 2021 · 7 mos) · Contract</p>
+                </div>
+                <ul className="cv-job-duties">
+                  <li>Developed full-stack applications using React.js and Android Development.</li>
+                  <li>Worked on cross-platform solutions and mobile application development.</li>
                 </ul>
               </div>
             </div>
@@ -276,8 +295,8 @@ https://www.hackerrank.com/certificates/93f72b72b7e6
             <div className="cv-section">
               <div className="cv-job">
                 <div className="cv-job-header">
-                  <h3 className="cv-job-title">CME – Beirut, Lebanon</h3>
-                  <p className="cv-job-role">Junior Software Engineer (2019–2020)</p>
+                  <h3 className="cv-job-title">CME Offshore sal – Lebanon</h3>
+                  <p className="cv-job-role">Software Engineer (Dec 2019 - Dec 2020 · 1 yr 1 mo)</p>
                 </div>
                 <ul className="cv-job-duties">
                   <li>Developed RESTful APIs using C# with EF Core (Code First), implementing secure authentication via Identity Server.</li>

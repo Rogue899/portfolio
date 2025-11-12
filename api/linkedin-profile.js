@@ -20,31 +20,37 @@ export default async function handler(req, res) {
     
     const profileData = {
       name: 'Tarek Roukos',
-      headline: 'Senior Web Developer',
+      headline: 'Senior Software Engineer',
       location: 'Beirut, Lebanon',
       profileUrl: 'https://www.linkedin.com/in/tarek-roukos-60058a9b',
-      summary: 'Experienced web developer specializing in React, SharePoint, and enterprise solutions. Passionate about building modern web applications and contributing to innovative projects.',
+      summary: 'Software Engineer with over 3 years of experience at SerVme (fully remote), specializing in front-end development using AngularJS and React. Skilled in managing and implementing complex features, debugging, and enhancing performance in large-scale applications.',
       experience: [
         {
-          title: 'Senior Web Developer',
+          title: 'Senior Software Engineer',
           company: 'Born Interactive',
-          period: '2025–Present',
-          location: 'Beirut, Lebanon'
+          period: 'Apr 2025 - Present · 8 mos',
+          location: 'On-site'
         },
         {
-          title: 'Software Engineer Level 2',
-          company: 'SerVme',
-          period: '2021–2025',
-          location: 'Beirut, Lebanon'
+          title: 'Software Engineer lvl 2',
+          company: 'serVme',
+          period: 'May 2021 - Jan 2025 · 3 yrs 9 mos',
+          location: 'Lebanon · Remote'
         },
         {
-          title: 'Junior Software Engineer',
-          company: 'CME',
-          period: '2019–2020',
-          location: 'Beirut, Lebanon'
+          title: 'Full Stack Engineer',
+          company: 'Lemonade Fashion',
+          period: 'Mar 2021 - Sep 2021 · 7 mos',
+          location: 'Contract'
+        },
+        {
+          title: 'Software Engineer',
+          company: 'CME Offshore sal',
+          period: 'Dec 2019 - Dec 2020 · 1 yr 1 mo',
+          location: 'Lebanon'
         }
       ],
-      skills: ['React.js', 'JavaScript', 'TypeScript', 'SharePoint', 'C#', 'Angular', 'Node.js', 'Redux', 'GraphQL', 'Docker', 'Kubernetes']
+      skills: ['TypeScript', 'React.js', 'JavaScript', 'AngularJS', 'Angular', 'Node.js', 'Leadership', 'Android Development', 'Reactjs', 'Full Stack Development']
     };
 
     return res.status(200).json(profileData);

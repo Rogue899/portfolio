@@ -4,15 +4,7 @@
   "framework": "vite",
   "rewrites": [
     {
-      "source": "/api/files/:fileId/history",
-      "destination": "/api/files/[fileId]/history.js"
-    },
-    {
-      "source": "/api/files/:fileId",
-      "destination": "/api/files/[fileId].js"
-    },
-    {
-      "source": "/(.*)",
+      "source": "/((?!api).*)",
       "destination": "/index.html"
     }
   ],

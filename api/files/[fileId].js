@@ -69,11 +69,21 @@ export default async function handler(req, res) {
       // Not authenticated, use 'guest'
     }
 
-    const client = await clientPromise;
-    if (!client) {
-      console.error('MongoDB client is null - check MONGODB_URI environment variable');
-      return res.status(500).json({ error: 'MongoDB not configured' });
+    let client;
+    try {
+      client = await clientPromise;
+      if (!client) {
+        console.error('MongoDB client is null - check MONGODB_URI environment variable');
+        return res.status(500).json({ error: 'MongoDB not configured' });
+      }
+    } catch (error) {
+      console.error('MongoDB connection error:', error);
+      return res.status(500).json({ 
+        error: 'MongoDB connection failed',
+        message: error.message 
+      });
     }
+    
     const db = client.db();
     const filesCollection = db.collection('files');
     const fileHistoryCollection = db.collection('fileHistory');
@@ -112,6 +122,10 @@ export default async function handler(req, res) {
 
     if (req.method === 'POST') {
       const { fileName, content } = req.body;
+
+      if (!fileName) {
+        return res.status(400).json({ error: 'fileName is required' });
+      }
 
       // Get existing file to save history
       const existingFile = await filesCollection.findOne({

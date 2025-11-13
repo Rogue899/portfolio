@@ -113,19 +113,10 @@ export default async function handler(req, res) {
     console.log('Request body:', req.body);
 
     if (req.method === 'GET') {
-      // Get file content - try authenticated user first, then guest
+      // Get file content - files are public, find by fileId only (no userId filter)
       let file = await filesCollection.findOne({
-        fileId: fileId,
-        userId: userId
+        fileId: fileId
       });
-      
-      if (!file && userId !== 'guest') {
-        // Try guest file
-        file = await filesCollection.findOne({
-          fileId: fileId,
-          userId: 'guest'
-        });
-      }
 
       if (file) {
         return res.status(200).json({
@@ -151,10 +142,9 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'fileName is required' });
       }
 
-      // Get existing file to save history
+      // Get existing file to save history (files are public, find by fileId only)
       const existingFile = await filesCollection.findOne({
-        fileId: fileId,
-        userId: userId
+        fileId: fileId
       });
 
       // Only save history for authenticated users
@@ -169,23 +159,25 @@ export default async function handler(req, res) {
         });
       }
 
-      // Update or create file
+      // Update or create file (files are public - no userId filter)
       const version = existingFile ? (existingFile.version || 1) + 1 : 1;
       
+      // Save with userId for history tracking, but allow anyone to read/edit
       await filesCollection.updateOne(
         {
-          fileId: fileId,
-          userId: userId
+          fileId: fileId
         },
         {
           $set: {
             fileName: fileName,
             content: content || '',
             updatedAt: new Date(),
-            version: version
+            version: version,
+            userId: userId // Store userId for history, but don't filter by it
           },
           $setOnInsert: {
-            createdAt: new Date()
+            createdAt: new Date(),
+            userId: userId
           }
         },
         { upsert: true }
@@ -201,16 +193,23 @@ export default async function handler(req, res) {
     }
 
     if (req.method === 'DELETE') {
+      // Files are public - anyone can delete
       await filesCollection.deleteOne({
-        fileId: fileId,
-        userId: userId
+        fileId: fileId
       });
 
-      // Optionally delete history too
-      await fileHistoryCollection.deleteMany({
-        fileId: fileId,
-        userId: userId
-      });
+      // Delete history for all users (if authenticated user, only delete their history)
+      if (userId !== 'guest') {
+        await fileHistoryCollection.deleteMany({
+          fileId: fileId,
+          userId: userId
+        });
+      } else {
+        // Guest deletion - delete all history for this file
+        await fileHistoryCollection.deleteMany({
+          fileId: fileId
+        });
+      }
 
       return res.status(200).json({ success: true, message: 'File deleted' });
     }

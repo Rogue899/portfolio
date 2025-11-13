@@ -129,3 +129,69 @@
   color: #999;
 }
 
+/* Mobile styles for FileEditor */
+@media (max-width: 768px) {
+  .editor-toolbar {
+    padding: 8px 12px;
+    height: 44px;
+    min-height: 44px;
+  }
+
+  .editor-title {
+    font-size: 13px;
+    gap: 10px;
+  }
+
+  .editor-icon {
+    font-size: 18px;
+  }
+
+  .editor-actions {
+    gap: 8px;
+  }
+
+  .editor-history-btn,
+  .editor-save-btn {
+    padding: 8px 16px;
+    font-size: 12px;
+    min-width: 70px;
+    min-height: 36px;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .editor-textarea {
+    padding: 12px;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .unsaved-indicator {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .editor-toolbar {
+    padding: 6px 10px;
+    height: 40px;
+    min-height: 40px;
+  }
+
+  .editor-title {
+    font-size: 12px;
+  }
+
+  .editor-history-btn,
+  .editor-save-btn {
+    padding: 6px 12px;
+    font-size: 11px;
+    min-width: 60px;
+    min-height: 32px;
+  }
+
+  .editor-textarea {
+    padding: 10px;
+    font-size: 13px;
+  }
+}
+

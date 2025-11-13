@@ -124,3 +124,47 @@
   cursor: not-allowed;
 }
 
+/* Mobile styles */
+@media (max-width: 768px) {
+  .login-modal {
+    width: 90vw;
+    max-width: 400px;
+  }
+
+  .modal-titlebar {
+    height: 32px;
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  .modal-content {
+    padding: 20px 16px;
+    font-size: 13px;
+  }
+
+  .form-group {
+    margin-bottom: 18px;
+  }
+
+  .form-group input {
+    padding: 10px;
+    font-size: 14px;
+    min-height: 44px;
+    -webkit-appearance: none;
+    border-radius: 0;
+  }
+
+  .modal-buttons {
+    gap: 12px;
+    margin-top: 20px;
+  }
+
+  .modal-button {
+    padding: 10px 20px;
+    font-size: 13px;
+    min-width: 80px;
+    min-height: 44px;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+

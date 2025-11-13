@@ -91,3 +91,35 @@
   background: linear-gradient(to bottom, #e53935 0%, #c62828 100%);
 }
 
+/* Mobile styles */
+@media (max-width: 768px) {
+  .delete-confirm-modal {
+    width: 90vw;
+    max-width: 350px;
+  }
+
+  .modal-titlebar {
+    height: 32px;
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  .modal-content {
+    padding: 20px 16px;
+    font-size: 13px;
+  }
+
+  .modal-buttons {
+    gap: 12px;
+    margin-top: 15px;
+  }
+
+  .modal-button {
+    padding: 10px 20px;
+    font-size: 13px;
+    min-width: 80px;
+    min-height: 44px;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+

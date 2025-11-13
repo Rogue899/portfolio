@@ -147,7 +147,7 @@ export default async function handler(req, res) {
         fileId: fileId
       });
 
-      // Only save history for authenticated users
+      // Only save history for authenticated users (userId used ONLY for history)
       if (userId !== 'guest' && existingFile && existingFile.content !== content) {
         await fileHistoryCollection.insertOne({
           fileId: fileId,
@@ -159,10 +159,9 @@ export default async function handler(req, res) {
         });
       }
 
-      // Update or create file (files are public - no userId filter)
+      // Update or create file (files are completely public - no userId stored or filtered)
       const version = existingFile ? (existingFile.version || 1) + 1 : 1;
       
-      // Save with userId for history tracking, but allow anyone to read/edit
       await filesCollection.updateOne(
         {
           fileId: fileId
@@ -172,12 +171,10 @@ export default async function handler(req, res) {
             fileName: fileName,
             content: content || '',
             updatedAt: new Date(),
-            version: version,
-            userId: userId // Store userId for history, but don't filter by it
+            version: version
           },
           $setOnInsert: {
-            createdAt: new Date(),
-            userId: userId
+            createdAt: new Date()
           }
         },
         { upsert: true }
@@ -198,18 +195,10 @@ export default async function handler(req, res) {
         fileId: fileId
       });
 
-      // Delete history for all users (if authenticated user, only delete their history)
-      if (userId !== 'guest') {
-        await fileHistoryCollection.deleteMany({
-          fileId: fileId,
-          userId: userId
-        });
-      } else {
-        // Guest deletion - delete all history for this file
-        await fileHistoryCollection.deleteMany({
-          fileId: fileId
-        });
-      }
+      // Delete all history for this file (history is user-specific, but file deletion removes all history)
+      await fileHistoryCollection.deleteMany({
+        fileId: fileId
+      });
 
       return res.status(200).json({ success: true, message: 'File deleted' });
     }

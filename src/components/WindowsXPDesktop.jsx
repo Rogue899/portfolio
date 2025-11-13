@@ -188,24 +188,13 @@ const WindowsXPDesktop = () => {
   const confirmShutdown = () => {
     setShutdownConfirm(false);
     // Try to close the window
-    try {
+    // Note: window.close() only works if the window was opened by JavaScript
+    // For regular tabs, browsers block this for security reasons
+    if (window.opener || window.history.length === 1) {
+      // Window was opened by script or is a popup - try to close
       window.close();
-      // If window.close() doesn't work (some browsers block it), try alternative methods
-      setTimeout(() => {
-        if (!document.hidden && window.opener) {
-          // If opened by another window, close it
-          window.close();
-        } else if (!document.hidden) {
-          // Show message if can't close automatically
-          setNotification({
-            title: 'Information',
-            message: 'Please close this tab/window manually.',
-            type: 'info'
-          });
-        }
-      }, 100);
-    } catch (error) {
-      // If closing fails, show message
+    } else {
+      // Regular tab - can't close programmatically, show message
       setNotification({
         title: 'Information',
         message: 'Please close this tab/window manually.',

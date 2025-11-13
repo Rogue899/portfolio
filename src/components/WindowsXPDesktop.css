@@ -96,11 +96,11 @@
   transform: translate(-50%, -50%);
   font-size: 48px;
   font-weight: bold;
-  color: #ff1493;
+  color: #8b0066;
   text-shadow: 
-    2px 2px 0px #ff69b4,
-    4px 4px 0px #ff1493,
-    0px 0px 10px rgba(255, 20, 147, 0.5);
+    2px 2px 0px #66004d,
+    4px 4px 0px #8b0066,
+    0px 0px 10px rgba(139, 0, 102, 0.5);
   font-family: 'Courier New', monospace;
   letter-spacing: 4px;
   image-rendering: pixelated;
@@ -115,15 +115,15 @@
 @keyframes pixelate {
   0%, 100% {
     text-shadow: 
-      2px 2px 0px #ff69b4,
-      4px 4px 0px #ff1493,
-      0px 0px 10px rgba(255, 20, 147, 0.5);
+      2px 2px 0px #66004d,
+      4px 4px 0px #8b0066,
+      0px 0px 10px rgba(139, 0, 102, 0.5);
   }
   50% {
     text-shadow: 
-      3px 3px 0px #ff69b4,
-      5px 5px 0px #ff1493,
-      0px 0px 10px rgba(255, 20, 147, 0.5);
+      3px 3px 0px #66004d,
+      5px 5px 0px #8b0066,
+      0px 0px 10px rgba(139, 0, 102, 0.5);
   }
 }
 

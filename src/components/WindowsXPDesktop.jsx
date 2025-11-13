@@ -27,7 +27,7 @@ const WindowsXPDesktop = () => {
   const [editValue, setEditValue] = useState('');
   const [selectedIcons, setSelectedIcons] = useState(new Set());
   const [selectionBox, setSelectionBox] = useState(null);
-  const [theme, setTheme] = useState('pink'); // classic-blue, bliss, berserker, pink
+  const [theme, setTheme] = useState('classic-blue'); // classic-blue, bliss, berserker, pink
   const [snapToGrid, setSnapToGrid] = useState(true);
   const [clipboard, setClipboard] = useState(null);
   const [showConfetti, setShowConfetti] = useState(false);

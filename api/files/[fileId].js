@@ -56,6 +56,12 @@ export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, token');
     res.setHeader('Content-Type', 'application/json');
 
+    console.log('===== FILE API CALLED =====');
+    console.log('Method:', req.method);
+    console.log('Query:', req.query);
+    console.log('Headers:', req.headers);
+    console.log('Body:', req.body);
+
     if (req.method === 'OPTIONS') {
       return res.status(200).end();
     }
@@ -223,11 +229,21 @@ export default async function handler(req, res) {
     }
   } catch (error) {
     // Catch any errors during handler initialization
-    console.error('Handler initialization error:', error);
+    console.error('===== HANDLER INITIALIZATION ERROR =====');
+    console.error('Error:', error);
     console.error('Error stack:', error.stack);
-    return res.status(500).json({
-      error: 'Server error',
-      message: error.message
-    });
+    console.error('Error name:', error.name);
+    console.error('Error message:', error.message);
+    
+    try {
+      return res.status(500).json({
+        error: 'Server error',
+        message: error.message,
+        name: error.name
+      });
+    } catch (sendError) {
+      console.error('Failed to send error response:', sendError);
+      return res.status(500).end();
+    }
   }
 }

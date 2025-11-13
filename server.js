@@ -310,7 +310,6 @@ app.get('/api/files/:fileId', async (req, res) => {
     }
 
     const { fileId } = req.params;
-    const { unlockPassword } = req.query;
 
     const client = await clientPromise;
     if (!client) {
@@ -324,56 +323,17 @@ app.get('/api/files/:fileId', async (req, res) => {
     });
 
     if (file) {
-      // Check if file is password protected
-      const isLocked = !!file.passwordHash;
-      
-      if (isLocked) {
-        // File is locked - check if password is provided
-        if (!unlockPassword) {
-          return res.json({
-            fileId: file.fileId,
-            fileName: file.fileName,
-            content: null, // Don't return content if locked
-            isLocked: true,
-            createdAt: file.createdAt,
-            updatedAt: file.updatedAt
-          });
-        }
-        
-        // Verify password
-        const isValidPassword = await bcrypt.compare(unlockPassword, file.passwordHash);
-        if (!isValidPassword) {
-          return res.status(401).json({
-            error: 'Incorrect password',
-            isLocked: true
-          });
-        }
-        
-        // Password correct - return content
-        return res.json({
-          fileId: file.fileId,
-          fileName: file.fileName,
-          content: file.content,
-          isLocked: true, // Still locked, but password verified
-          createdAt: file.createdAt,
-          updatedAt: file.updatedAt
-        });
-      }
-      
-      // File is not locked - return content
       return res.json({
         fileId: file.fileId,
         fileName: file.fileName,
         content: file.content,
-        isLocked: false,
         createdAt: file.createdAt,
         updatedAt: file.updatedAt
       });
     } else {
       return res.json({
         fileId: fileId,
-        content: '',
-        isLocked: false
+        content: ''
       });
     }
   } catch (error) {
@@ -400,7 +360,7 @@ app.post('/api/files/:fileId', async (req, res) => {
     }
 
     const { fileId } = req.params;
-    const { fileName, content, password, unlockPassword } = req.body;
+    const { fileName, content } = req.body;
 
     if (!fileName) {
       return res.status(400).json({ error: 'fileName is required' });
@@ -435,28 +395,10 @@ app.post('/api/files/:fileId', async (req, res) => {
     const filesCollection = db.collection('files');
     const fileHistoryCollection = db.collection('fileHistory');
 
-    // Check if file is locked and password is provided for unlock
+    // Get existing file to save history (files are public, find by fileId only)
     const existingFile = await filesCollection.findOne({
       fileId: fileId
     });
-
-    if (existingFile && existingFile.passwordHash) {
-      // File is locked - check password
-      if (!unlockPassword) {
-        return res.status(403).json({ 
-          error: 'File is password protected',
-          isLocked: true 
-        });
-      }
-      
-      const isValidPassword = await bcrypt.compare(unlockPassword, existingFile.passwordHash);
-      if (!isValidPassword) {
-        return res.status(401).json({ 
-          error: 'Incorrect password',
-          isLocked: true 
-        });
-      }
-    }
 
     // Only save history for authenticated users (userId used ONLY for history)
     if (userId !== 'guest' && existingFile && existingFile.content !== content) {
@@ -473,40 +415,19 @@ app.post('/api/files/:fileId', async (req, res) => {
     // Update or create file (files are completely public - no userId stored or filtered)
     const version = existingFile ? (existingFile.version || 1) + 1 : 1;
     
-    // Handle password: if provided, hash it; if empty string, remove it
-    let passwordHash = existingFile?.passwordHash || null;
-    if (password !== undefined) {
-      if (password && password.trim() !== '') {
-        passwordHash = await bcrypt.hash(password, 10);
-      } else {
-        // Empty password means remove password protection
-        passwordHash = null;
-      }
-    }
-    
-    const updateData = {
-      fileName: fileName,
-      content: content || '',
-      updatedAt: new Date(),
-      version: version
-    };
-    
-    if (passwordHash) {
-      updateData.passwordHash = passwordHash;
-    } else if (password !== undefined) {
-      // Explicitly remove password if it was set to empty
-      updateData.passwordHash = null;
-    }
-    
     await filesCollection.updateOne(
       {
         fileId: fileId
       },
       {
-        $set: updateData,
+        $set: {
+          fileName: fileName,
+          content: content || '',
+          updatedAt: new Date(),
+          version: version
+        },
         $unset: {
-          userId: "", // Remove userId field if it exists (for existing files)
-          ...(passwordHash === null && password !== undefined ? { passwordHash: "" } : {}) // Remove password if explicitly set to null
+          userId: "" // Remove userId field if it exists (for existing files)
         },
         $setOnInsert: {
           createdAt: new Date()

@@ -126,6 +126,37 @@ app.delete('/api/files/:fileId', (req, res) => {
 
 // ===== MongoDB Routes =====
 
+// Helper function to extract IP address from request
+function getClientIP(req) {
+  // Check various headers (Vercel, proxies, etc.)
+  const forwardedFor = req.headers['x-forwarded-for'];
+  if (forwardedFor) {
+    // x-forwarded-for can contain multiple IPs, get the first one (original client)
+    const ips = forwardedFor.split(',').map(ip => ip.trim());
+    return ips[0];
+  }
+  
+  // Check other common headers
+  if (req.headers['x-real-ip']) {
+    return req.headers['x-real-ip'];
+  }
+  
+  if (req.headers['cf-connecting-ip']) {
+    return req.headers['cf-connecting-ip'];
+  }
+  
+  // Fallback to connection remote address
+  if (req.connection && req.connection.remoteAddress) {
+    return req.connection.remoteAddress;
+  }
+  
+  if (req.socket && req.socket.remoteAddress) {
+    return req.socket.remoteAddress;
+  }
+  
+  return 'unknown';
+}
+
 // Helper function to extract token from headers
 function extractToken(req) {
   if (req.headers.token) {
@@ -317,9 +348,44 @@ app.get('/api/files/:fileId', async (req, res) => {
     }
     const db = client.db();
     const filesCollection = db.collection('files');
+    const fileAccessLogsCollection = db.collection('fileAccessLogs');
+
+    // Get client IP address
+    const clientIP = getClientIP(req);
+    
+    // Try to get userId from token if available, otherwise use 'guest'
+    let userId = 'guest';
+    try {
+      const token = extractToken(req);
+      if (token) {
+        const jwtSecret = process.env.JWT_SECRET;
+        const jwtIssuer = process.env.JWT_ISSUER || 'swiftserve';
+        const jwtAudience = process.env.JWT_AUDIENCE || 'swiftserve-users';
+        const decoded = jwt.verify(token, jwtSecret, {
+          issuer: jwtIssuer,
+          audience: jwtAudience,
+          algorithms: ['HS256']
+        });
+        if (decoded.type === 'access') {
+          userId = decoded.id;
+        }
+      }
+    } catch (error) {
+      // Not authenticated, use 'guest'
+    }
 
     let file = await filesCollection.findOne({
       fileId: fileId
+    });
+
+    // Log file view access
+    await fileAccessLogsCollection.insertOne({
+      fileId: fileId,
+      action: 'view',
+      userId: userId,
+      ipAddress: clientIP,
+      timestamp: new Date(),
+      userAgent: req.headers['user-agent'] || 'unknown'
     });
 
     if (file) {
@@ -394,6 +460,10 @@ app.post('/api/files/:fileId', async (req, res) => {
     const db = client.db();
     const filesCollection = db.collection('files');
     const fileHistoryCollection = db.collection('fileHistory');
+    const fileAccessLogsCollection = db.collection('fileAccessLogs');
+
+    // Get client IP address
+    const clientIP = getClientIP(req);
 
     // Get existing file to save history (files are public, find by fileId only)
     const existingFile = await filesCollection.findOne({
@@ -408,12 +478,14 @@ app.post('/api/files/:fileId', async (req, res) => {
         fileName: existingFile.fileName,
         content: existingFile.content,
         savedAt: existingFile.updatedAt || existingFile.createdAt,
-        version: existingFile.version || 1
+        version: existingFile.version || 1,
+        ipAddress: clientIP
       });
     }
 
     // Update or create file (files are completely public - no userId stored or filtered)
     const version = existingFile ? (existingFile.version || 1) + 1 : 1;
+    const isNewFile = !existingFile;
     
     await filesCollection.updateOne(
       {
@@ -435,6 +507,17 @@ app.post('/api/files/:fileId', async (req, res) => {
       },
       { upsert: true }
     );
+
+    // Log file creation or edit
+    await fileAccessLogsCollection.insertOne({
+      fileId: fileId,
+      action: isNewFile ? 'create' : 'edit',
+      userId: userId,
+      ipAddress: clientIP,
+      timestamp: new Date(),
+      userAgent: req.headers['user-agent'] || 'unknown',
+      fileName: fileName
+    });
 
     return res.json({
       success: true,
@@ -494,15 +577,27 @@ app.delete('/api/files/:fileId', async (req, res) => {
     const db = client.db();
     const filesCollection = db.collection('files');
     const fileHistoryCollection = db.collection('fileHistory');
+    const fileAccessLogsCollection = db.collection('fileAccessLogs');
+
+    // Get client IP address
+    const clientIP = getClientIP(req);
+
+    // Log file deletion before deleting
+    await fileAccessLogsCollection.insertOne({
+      fileId: fileId,
+      action: 'delete',
+      userId: userId,
+      ipAddress: clientIP,
+      timestamp: new Date(),
+      userAgent: req.headers['user-agent'] || 'unknown'
+    });
 
     await filesCollection.deleteOne({
-      fileId: fileId,
-      userId: userId
+      fileId: fileId
     });
 
     await fileHistoryCollection.deleteMany({
-      fileId: fileId,
-      userId: userId
+      fileId: fileId
     });
 
     return res.json({ success: true, message: 'File deleted' });
@@ -549,6 +644,48 @@ app.get('/api/files/:fileId/history', verifyToken, async (req, res) => {
     });
   } catch (error) {
     console.error('History fetch error:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// GET /api/files/:fileId/access-logs (authenticated only)
+app.get('/api/files/:fileId/access-logs', verifyToken, async (req, res) => {
+  try {
+    if (!process.env.MONGODB_URI) {
+      return res.status(500).json({ error: 'MongoDB not configured' });
+    }
+
+    const { fileId } = req.params;
+
+    const client = await clientPromise;
+    if (!client) {
+      return res.status(500).json({ error: 'MongoDB not configured' });
+    }
+    const db = client.db();
+    const fileAccessLogsCollection = db.collection('fileAccessLogs');
+
+    // Get all access logs for this file, sorted by most recent first
+    const logs = await fileAccessLogsCollection
+      .find({
+        fileId: fileId
+      })
+      .sort({ timestamp: -1 })
+      .limit(100) // Limit to 100 most recent entries
+      .toArray();
+
+    return res.json({
+      success: true,
+      logs: logs.map(log => ({
+        action: log.action,
+        userId: log.userId,
+        ipAddress: log.ipAddress,
+        timestamp: log.timestamp,
+        userAgent: log.userAgent,
+        fileName: log.fileName
+      }))
+    });
+  } catch (error) {
+    console.error('Access logs fetch error:', error);
     return res.status(500).json({ error: 'Internal server error' });
   }
 });

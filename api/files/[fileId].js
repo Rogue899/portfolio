@@ -1,6 +1,37 @@
 import connectToDatabase from '../../lib/mongodb.js';
 import jwt from 'jsonwebtoken';
 
+// Helper function to extract IP address from request
+function getClientIP(req) {
+  // Check various headers (Vercel, proxies, etc.)
+  const forwardedFor = req.headers['x-forwarded-for'];
+  if (forwardedFor) {
+    // x-forwarded-for can contain multiple IPs, get the first one (original client)
+    const ips = forwardedFor.split(',').map(ip => ip.trim());
+    return ips[0];
+  }
+  
+  // Check other common headers
+  if (req.headers['x-real-ip']) {
+    return req.headers['x-real-ip'];
+  }
+  
+  if (req.headers['cf-connecting-ip']) {
+    return req.headers['cf-connecting-ip'];
+  }
+  
+  // Fallback to connection remote address
+  if (req.connection && req.connection.remoteAddress) {
+    return req.connection.remoteAddress;
+  }
+  
+  if (req.socket && req.socket.remoteAddress) {
+    return req.socket.remoteAddress;
+  }
+  
+  return 'unknown';
+}
+
 // Helper function to extract token from headers (supports both formats)
 function extractToken(req) {
   // Try custom 'token' header first
@@ -108,14 +139,29 @@ export default async function handler(req, res) {
     
     const filesCollection = db.collection('files');
     const fileHistoryCollection = db.collection('fileHistory');
+    const fileAccessLogsCollection = db.collection('fileAccessLogs');
+
+    // Get client IP address
+    const clientIP = getClientIP(req);
 
     console.log('Request method:', req.method);
     console.log('Request body:', req.body);
+    console.log('Client IP:', clientIP);
 
     if (req.method === 'GET') {
       // Get file content - files are public, find by fileId only (no userId filter)
       let file = await filesCollection.findOne({
         fileId: fileId
+      });
+
+      // Log file view access
+      await fileAccessLogsCollection.insertOne({
+        fileId: fileId,
+        action: 'view',
+        userId: userId,
+        ipAddress: clientIP,
+        timestamp: new Date(),
+        userAgent: req.headers['user-agent'] || 'unknown'
       });
 
       if (file) {
@@ -155,12 +201,14 @@ export default async function handler(req, res) {
           fileName: existingFile.fileName,
           content: existingFile.content,
           savedAt: existingFile.updatedAt || existingFile.createdAt,
-          version: existingFile.version || 1
+          version: existingFile.version || 1,
+          ipAddress: clientIP
         });
       }
 
       // Update or create file (files are completely public - no userId stored or filtered)
       const version = existingFile ? (existingFile.version || 1) + 1 : 1;
+      const isNewFile = !existingFile;
       
       await filesCollection.updateOne(
         {
@@ -183,6 +231,17 @@ export default async function handler(req, res) {
         { upsert: true }
       );
 
+      // Log file creation or edit
+      await fileAccessLogsCollection.insertOne({
+        fileId: fileId,
+        action: isNewFile ? 'create' : 'edit',
+        userId: userId,
+        ipAddress: clientIP,
+        timestamp: new Date(),
+        userAgent: req.headers['user-agent'] || 'unknown',
+        fileName: fileName
+      });
+
       return res.status(200).json({
         success: true,
         message: 'File saved',
@@ -193,6 +252,16 @@ export default async function handler(req, res) {
     }
 
     if (req.method === 'DELETE') {
+      // Log file deletion before deleting
+      await fileAccessLogsCollection.insertOne({
+        fileId: fileId,
+        action: 'delete',
+        userId: userId,
+        ipAddress: clientIP,
+        timestamp: new Date(),
+        userAgent: req.headers['user-agent'] || 'unknown'
+      });
+
       // Files are public - anyone can delete
       await filesCollection.deleteOne({
         fileId: fileId

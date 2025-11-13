@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import NotificationModal from './NotificationModal';
 import FileHistory from './FileHistory';
+import FileAccessLogs from './FileAccessLogs';
 import './FileEditor.css';
 
 const FileEditor = ({ fileId, fileName, onClose, onSave }) => {
@@ -10,6 +11,7 @@ const FileEditor = ({ fileId, fileName, onClose, onSave }) => {
   const [hasChanges, setHasChanges] = useState(false);
   const [notification, setNotification] = useState(null);
   const [showHistory, setShowHistory] = useState(false);
+  const [showAccessLogs, setShowAccessLogs] = useState(false);
 
   useEffect(() => {
     // Load file content from backend
@@ -128,13 +130,22 @@ const FileEditor = ({ fileId, fileName, onClose, onSave }) => {
           <div className="editor-actions">
             {hasChanges && <span className="unsaved-indicator">●</span>}
             {localStorage.getItem('authToken') && (
-              <button 
-                className="editor-history-btn" 
-                onClick={() => setShowHistory(true)}
-                title="View file history"
-              >
-                History
-              </button>
+              <>
+                <button 
+                  className="editor-history-btn" 
+                  onClick={() => setShowHistory(true)}
+                  title="View file history"
+                >
+                  History
+                </button>
+                <button 
+                  className="editor-history-btn" 
+                  onClick={() => setShowAccessLogs(true)}
+                  title="View access logs"
+                >
+                  Access Logs
+                </button>
+              </>
             )}
             <button 
               className="editor-save-btn" 
@@ -172,6 +183,12 @@ const FileEditor = ({ fileId, fileName, onClose, onSave }) => {
             setHasChanges(true);
             setShowHistory(false);
           }}
+        />
+      )}
+      {showAccessLogs && localStorage.getItem('authToken') && (
+        <FileAccessLogs
+          fileId={fileId}
+          onClose={() => setShowAccessLogs(false)}
         />
       )}
     </>

@@ -26,6 +26,10 @@ function verifyToken(req) {
   }
 
   const jwtSecret = process.env.JWT_SECRET;
+  if (!jwtSecret) {
+    throw new Error('JWT_SECRET not configured');
+  }
+  
   const jwtIssuer = process.env.JWT_ISSUER || 'swiftserve';
   const jwtAudience = process.env.JWT_AUDIENCE || 'swiftserve-users';
   
@@ -44,17 +48,19 @@ function verifyToken(req) {
 }
 
 export default async function handler(req, res) {
-  // Enable CORS
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, token');
-  res.setHeader('Content-Type', 'application/json');
-
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-
+  // Wrap everything in try-catch to ensure we always return JSON
   try {
+    // Enable CORS
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, token');
+    res.setHeader('Content-Type', 'application/json');
+
+    if (req.method === 'OPTIONS') {
+      return res.status(200).end();
+    }
+
+    try {
     const { fileId } = req.query;
     
     // Log for debugging
@@ -210,19 +216,28 @@ export default async function handler(req, res) {
       return res.status(200).json({ success: true, message: 'File deleted' });
     }
 
-    return res.status(405).json({ error: 'Method not allowed' });
+      return res.status(405).json({ error: 'Method not allowed' });
+    } catch (error) {
+      // Don't return 401 for missing tokens - allow guest access
+      console.error('File operation error:', error);
+      console.error('Error details:', {
+        message: error.message,
+        stack: error.stack,
+        fileId: req.query?.fileId,
+        method: req.method
+      });
+      return res.status(500).json({ 
+        error: 'Internal server error',
+        message: error.message 
+      });
+    }
   } catch (error) {
-    // Don't return 401 for missing tokens - allow guest access
-    console.error('File operation error:', error);
-    console.error('Error details:', {
-      message: error.message,
-      stack: error.stack,
-      fileId: req.query?.fileId,
-      method: req.method
-    });
-    return res.status(500).json({ 
-      error: 'Internal server error',
-      message: error.message 
+    // Catch any errors during handler initialization
+    console.error('Handler initialization error:', error);
+    console.error('Error stack:', error.stack);
+    return res.status(500).json({
+      error: 'Server error',
+      message: error.message
     });
   }
 }

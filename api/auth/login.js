@@ -29,7 +29,14 @@ export default async function handler(req, res) {
     }
 
     const client = await clientPromise;
-    const db = client.db();
+    if (!client) {
+      console.error('MongoDB client is null - check MONGODB_URI environment variable');
+      return res.status(500).json({ error: 'MongoDB not configured' });
+    }
+    
+    // Use database from connection string, or default to 'delivery_platform'
+    const dbName = process.env.MONGODB_DB_NAME || undefined; // undefined = use from connection string
+    const db = client.db(dbName);
     const usersCollection = db.collection('users');
 
     // Find user by email
@@ -48,6 +55,10 @@ export default async function handler(req, res) {
 
     // Generate JWT tokens matching your system
     const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret) {
+      console.error('JWT_SECRET is missing from environment variables');
+      return res.status(500).json({ error: 'Server configuration error' });
+    }
     const jwtIssuer = process.env.JWT_ISSUER || 'swiftserve';
     const jwtAudience = process.env.JWT_AUDIENCE || 'swiftserve-users';
     const accessExpiresIn = process.env.JWT_ACCESS_EXPIRES_IN || '7d';

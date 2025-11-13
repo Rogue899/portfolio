@@ -96,7 +96,9 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'MongoDB client invalid' });
     }
     
-    const db = client.db();
+    // Use database from connection string, or default to 'delivery_platform'
+    const dbName = process.env.MONGODB_DB_NAME || undefined; // undefined = use from connection string
+    const db = client.db(dbName);
     const filesCollection = db.collection('files');
     const fileHistoryCollection = db.collection('fileHistory');
 

@@ -26,6 +26,8 @@ dist-ssr
 # Backend data
 desktop-data.json
 files/
+# But allow API routes
+!api/files/
 
 # Environment variables
 .env.local

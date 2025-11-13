@@ -48,10 +48,16 @@ const FileEditor = ({ fileId, fileName, onClose, onSave }) => {
         if (data) {
           setIsLocked(data.isLocked || false);
           if (data.isLocked) {
+            // File is locked - show password prompt
             setShowPasswordPrompt(true);
             setContent('');
           } else {
+            // File is unlocked - show content and prompt to set password if empty
             setContent(data.content || '');
+            if (!data.content || data.content.trim() === '') {
+              // New/empty file - prompt to set password
+              setShowPasswordDialog(true);
+            }
           }
         }
         setLoading(false);
@@ -178,9 +184,10 @@ const FileEditor = ({ fileId, fileName, onClose, onSave }) => {
         body.unlockPassword = unlockPassword;
       }
 
-      // Include password if setting/changing password
+      // Include password if it was set in the dialog
       if (filePassword) {
         body.password = filePassword;
+        setFilePassword(''); // Clear after using
       }
     
       const response = await fetch(apiUrl, {
@@ -263,6 +270,7 @@ const FileEditor = ({ fileId, fileName, onClose, onSave }) => {
               placeholder="Enter password"
               onKeyPress={(e) => e.key === 'Enter' && handleUnlock()}
               style={{ padding: '10px', fontSize: '14px' }}
+              autoFocus
             />
             <button 
               className="editor-save-btn" 
@@ -287,13 +295,6 @@ const FileEditor = ({ fileId, fileName, onClose, onSave }) => {
           </div>
           <div className="editor-actions">
             {hasChanges && <span className="unsaved-indicator">●</span>}
-            <button 
-              className="editor-history-btn" 
-              onClick={() => setShowPasswordDialog(true)}
-              title={isLocked ? "Change password" : "Set password"}
-            >
-              {isLocked ? '🔒 Change Password' : '🔓 Set Password'}
-            </button>
             {localStorage.getItem('authToken') && (
               <button 
                 className="editor-history-btn" 
@@ -323,84 +324,43 @@ const FileEditor = ({ fileId, fileName, onClose, onSave }) => {
         </div>
       </div>
       {showPasswordDialog && (
-        <div className="modal-overlay" onClick={() => setShowPasswordDialog(false)}>
+        <div className="modal-overlay" onClick={() => {
+          // Don't allow closing by clicking outside - must set password or skip
+        }}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '400px' }}>
-            <h3>{isLocked ? 'Change Password' : 'Set Password'}</h3>
-            <p>Enter a password to protect this file. Leave empty to remove password.</p>
+            <h3>🔒 Set Password</h3>
+            <p>Protect this file with a password. You can skip this step.</p>
             <input
               type="password"
               value={filePassword}
               onChange={(e) => setFilePassword(e.target.value)}
-              placeholder="Enter password (leave empty to unlock)"
+              placeholder="Enter password (optional)"
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') {
+                  setShowPasswordDialog(false);
+                  if (filePassword) {
+                    setIsLocked(true);
+                  }
+                }
+              }}
               style={{ width: '100%', padding: '10px', marginBottom: '10px', fontSize: '14px' }}
+              autoFocus
             />
             <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
               <button onClick={() => {
                 setShowPasswordDialog(false);
                 setFilePassword('');
-              }}>Cancel</button>
+              }}>Skip</button>
               <button 
                 className="editor-save-btn"
-                onClick={async () => {
-                  // Save password change immediately
-                  const token = localStorage.getItem('authToken');
-                  const apiUrl = import.meta.env.PROD 
-                    ? `/api/files/${fileId}`
-                    : `http://localhost:3001/api/files/${fileId}`;
-                  
-                  const headers = {
-                    'Content-Type': 'application/json',
-                  };
-                  
-                  if (token) {
-                    headers['token'] = token;
-                    headers['Authorization'] = `Bearer ${token}`;
-                  }
-
-                  try {
-                    const body = {
-                      fileName: fileName,
-                      content: content,
-                      password: filePassword || '' // Empty string to remove password
-                    };
-
-                    if (isLocked && unlockPassword) {
-                      body.unlockPassword = unlockPassword;
-                    }
-
-                    const response = await fetch(apiUrl, {
-                      method: 'POST',
-                      headers,
-                      body: JSON.stringify(body)
-                    });
-
-                    if (response.ok) {
-                      setIsLocked(!!filePassword);
-                      setShowPasswordDialog(false);
-                      setFilePassword('');
-                      setNotification({
-                        title: 'Success',
-                        message: filePassword ? 'Password set successfully!' : 'Password removed successfully!',
-                        type: 'success'
-                      });
-                    } else {
-                      const data = await response.json();
-                      setNotification({
-                        title: 'Error',
-                        message: data.error || 'Failed to update password',
-                        type: 'error'
-                      });
-                    }
-                  } catch (error) {
-                    setNotification({
-                      title: 'Error',
-                      message: 'Failed to update password',
-                      type: 'error'
-                    });
+                onClick={() => {
+                  setShowPasswordDialog(false);
+                  if (filePassword) {
+                    setIsLocked(true);
                   }
                 }}
               >
-                {isLocked && !filePassword ? 'Remove Password' : 'Set Password'}
+                Set Password
               </button>
             </div>
           </div>

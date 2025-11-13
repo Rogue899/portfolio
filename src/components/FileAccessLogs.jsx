@@ -46,9 +46,39 @@ const FileAccessLogs = ({ fileId, onClose }) => {
     fetchLogs();
   }, [fileId]);
 
-  const formatDate = (dateString) => {
+  const formatTime = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diff = now - date;
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(diff / 3600000);
+    const days = Math.floor(diff / 86400000);
+
+    if (minutes < 1) return 'just now';
+    if (minutes < 60) return `${minutes}m ago`;
+    if (hours < 24) return `${hours}h ago`;
+    if (days < 7) return `${days}d ago`;
+    return date.toLocaleDateString();
+  };
+
+  const formatFullDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleString();
+  };
+
+  const getActionMessage = (action) => {
+    switch (action) {
+      case 'create':
+        return 'created this file';
+      case 'edit':
+        return 'edited this file';
+      case 'view':
+        return 'viewed this file';
+      case 'delete':
+        return 'deleted this file';
+      default:
+        return 'accessed this file';
+    }
   };
 
   const getActionIcon = (action) => {
@@ -66,58 +96,90 @@ const FileAccessLogs = ({ fileId, onClose }) => {
     }
   };
 
-  const getActionColor = (action) => {
-    switch (action) {
-      case 'create':
-        return '#4caf50';
-      case 'edit':
-        return '#2196f3';
-      case 'view':
-        return '#9e9e9e';
-      case 'delete':
-        return '#f44336';
-      default:
-        return '#000';
+  // Generate a color for each IP address
+  const getIPColor = (ip) => {
+    if (!ip || ip === 'unknown') return '#9e9e9e';
+    // Simple hash function to generate consistent colors
+    let hash = 0;
+    for (let i = 0; i < ip.length; i++) {
+      hash = ip.charCodeAt(i) + ((hash << 5) - hash);
     }
+    const hue = Math.abs(hash) % 360;
+    return `hsl(${hue}, 70%, 50%)`;
+  };
+
+  // Get a short name for the IP (last octet or first few chars)
+  const getIPName = (ip) => {
+    if (!ip || ip === 'unknown') return 'Unknown';
+    const parts = ip.split('.');
+    if (parts.length === 4) {
+      return `IP-${parts[3]}`;
+    }
+    return ip.substring(0, 8) + '...';
   };
 
   return (
     <div className="file-access-logs-overlay" onClick={onClose}>
       <div className="file-access-logs-modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-titlebar">
-          <span className="modal-title">Access Logs</span>
+          <span className="modal-title">Access Logs - Conversation View</span>
           <button className="modal-close-button" onClick={onClose}>×</button>
         </div>
-        <div className="modal-content">
+        <div className="modal-content conversation-view">
           {loading && <div className="loading">Loading access logs...</div>}
           {error && <div className="error-message">{error}</div>}
           {!loading && !error && logs.length === 0 && (
             <div className="no-logs">No access logs available for this file.</div>
           )}
           {!loading && !error && logs.length > 0 && (
-            <div className="logs-list">
-              <div className="logs-header">
-                <div className="log-column">Action</div>
-                <div className="log-column">IP Address</div>
-                <div className="log-column">User</div>
-                <div className="log-column">Timestamp</div>
-              </div>
-              {logs.map((log, index) => (
-                <div key={index} className="log-item">
-                  <div className="log-action" style={{ color: getActionColor(log.action) }}>
-                    <span className="log-icon">{getActionIcon(log.action)}</span>
-                    <span className="log-action-text">{log.action.toUpperCase()}</span>
-                  </div>
-                  <div className="log-ip">{log.ipAddress || 'unknown'}</div>
-                  <div className="log-user">{log.userId === 'guest' ? 'Guest' : log.userId}</div>
-                  <div className="log-timestamp">{formatDate(log.timestamp)}</div>
-                  {log.userAgent && (
-                    <div className="log-user-agent" title={log.userAgent}>
-                      {log.userAgent.length > 50 ? log.userAgent.substring(0, 50) + '...' : log.userAgent}
+            <div className="conversation-container">
+              {logs.map((log, index) => {
+                const ipColor = getIPColor(log.ipAddress);
+                const isSameIP = index > 0 && logs[index - 1].ipAddress === log.ipAddress;
+                const showIPHeader = !isSameIP;
+                
+                return (
+                  <div key={index} className={`conversation-message ${showIPHeader ? 'new-ip' : ''}`}>
+                    {showIPHeader && (
+                      <div className="message-header">
+                        <div className="ip-avatar" style={{ backgroundColor: ipColor }}>
+                          {getIPName(log.ipAddress).charAt(0)}
+                        </div>
+                        <div className="ip-info">
+                          <div className="ip-name" style={{ color: ipColor }}>
+                            {log.ipAddress || 'unknown'}
+                          </div>
+                          <div className="ip-user">
+                            {log.userId === 'guest' ? 'Guest' : `User: ${log.userId.substring(0, 8)}...`}
+                          </div>
+                        </div>
+                        <div className="message-time" title={formatFullDate(log.timestamp)}>
+                          {formatTime(log.timestamp)}
+                        </div>
+                      </div>
+                    )}
+                    <div className="message-bubble" style={{ borderLeftColor: ipColor }}>
+                      <div className="message-icon">{getActionIcon(log.action)}</div>
+                      <div className="message-text">
+                        <span className="message-action">{getActionMessage(log.action)}</span>
+                        {log.fileName && log.action === 'create' && (
+                          <span className="message-filename"> ({log.fileName})</span>
+                        )}
+                      </div>
+                      {!showIPHeader && (
+                        <div className="message-time-inline" title={formatFullDate(log.timestamp)}>
+                          {formatTime(log.timestamp)}
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
-              ))}
+                    {log.userAgent && (
+                      <div className="message-meta" title={log.userAgent}>
+                        {log.userAgent.length > 60 ? log.userAgent.substring(0, 60) + '...' : log.userAgent}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>

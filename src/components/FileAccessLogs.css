@@ -17,8 +17,8 @@
   border: 2px outset #ece9d8;
   box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.5);
   width: 90%;
-  max-width: 900px;
-  max-height: 80vh;
+  max-width: 800px;
+  max-height: 85vh;
   display: flex;
   flex-direction: column;
 }
@@ -60,16 +60,22 @@
 }
 
 .modal-content {
-  padding: 20px;
+  padding: 0;
   overflow-y: auto;
   flex: 1;
+  background: #f5f5f5;
+}
+
+.modal-content.conversation-view {
+  padding: 16px;
+  background: linear-gradient(to bottom, #e8e8e8 0%, #f5f5f5 100%);
 }
 
 .loading,
 .error-message,
 .no-logs {
   text-align: center;
-  padding: 20px;
+  padding: 40px 20px;
   color: #666;
   font-size: 12px;
 }
@@ -80,88 +86,141 @@
   border: 1px solid #d32f2f;
   padding: 10px;
   border-radius: 2px;
+  margin: 20px;
 }
 
-.logs-list {
+.no-logs {
+  padding: 40px;
+}
+
+/* Conversation Style */
+.conversation-container {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-}
-
-.logs-header {
-  display: grid;
-  grid-template-columns: 120px 1fr 120px 180px;
   gap: 12px;
-  padding: 8px 12px;
-  background: linear-gradient(to bottom, #d4d0c8 0%, #c4c0b8 100%);
-  border: 1px inset #ece9d8;
-  font-weight: bold;
-  font-size: 11px;
-  color: #000;
-  margin-bottom: 8px;
+  padding-bottom: 16px;
 }
 
-.log-item {
-  display: grid;
-  grid-template-columns: 120px 1fr 120px 180px;
-  gap: 12px;
-  padding: 10px 12px;
-  background: white;
-  border: 1px solid #d4d0c8;
-  font-size: 11px;
-  transition: background-color 0.1s;
+.conversation-message {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  animation: fadeIn 0.3s ease-in;
 }
 
-.log-item:hover {
-  background: #f5f5f5;
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.log-column {
-  font-weight: bold;
+.conversation-message.new-ip {
+  margin-top: 8px;
 }
 
-.log-action {
+.message-header {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.ip-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
   font-weight: bold;
-}
-
-.log-icon {
   font-size: 14px;
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  flex-shrink: 0;
 }
 
-.log-action-text {
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+.ip-info {
+  flex: 1;
+  min-width: 0;
 }
 
-.log-ip {
+.ip-name {
+  font-weight: bold;
+  font-size: 12px;
   font-family: 'Courier New', monospace;
-  color: #333;
   word-break: break-all;
 }
 
-.log-user {
-  color: #666;
+.ip-user {
   font-size: 10px;
+  color: #666;
+  margin-top: 2px;
 }
 
-.log-timestamp {
-  color: #666;
+.message-time {
   font-size: 10px;
-  font-family: 'Courier New', monospace;
+  color: #999;
+  white-space: nowrap;
+  margin-left: auto;
 }
 
-.log-user-agent {
-  grid-column: 1 / -1;
+.message-bubble {
+  background: white;
+  border: 1px solid #d4d0c8;
+  border-left: 4px solid;
+  border-radius: 4px;
+  padding: 10px 14px;
+  margin-left: 42px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+}
+
+.message-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.message-text {
+  flex: 1;
+  font-size: 12px;
+  color: #333;
+  line-height: 1.4;
+}
+
+.message-action {
+  font-weight: 500;
+}
+
+.message-filename {
+  color: #666;
+  font-style: italic;
+}
+
+.message-time-inline {
   font-size: 9px;
   color: #999;
-  margin-top: 4px;
-  padding-top: 4px;
-  border-top: 1px solid #e0e0e0;
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+.message-meta {
+  font-size: 9px;
+  color: #999;
+  margin-left: 42px;
+  padding-left: 4px;
   font-style: italic;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* Mobile styles */
@@ -172,35 +231,48 @@
     max-height: 90vh;
   }
 
-  .logs-header,
-  .log-item {
-    grid-template-columns: 1fr;
+  .modal-content.conversation-view {
+    padding: 12px;
+  }
+
+  .conversation-container {
+    gap: 10px;
+  }
+
+  .message-header {
     gap: 8px;
   }
 
-  .log-column {
-    display: none;
-  }
-
-  .log-item {
-    padding: 12px;
-    border-radius: 2px;
-  }
-
-  .log-action {
+  .ip-avatar {
+    width: 28px;
+    height: 28px;
     font-size: 12px;
   }
 
-  .log-ip,
-  .log-user,
-  .log-timestamp {
+  .ip-name {
     font-size: 11px;
-    padding: 4px 0;
   }
 
-  .log-user-agent {
-    grid-column: 1;
-    font-size: 10px;
+  .ip-user {
+    font-size: 9px;
+  }
+
+  .message-bubble {
+    margin-left: 36px;
+    padding: 8px 12px;
+  }
+
+  .message-icon {
+    font-size: 16px;
+  }
+
+  .message-text {
+    font-size: 11px;
+  }
+
+  .message-meta {
+    margin-left: 36px;
+    font-size: 8px;
   }
 }
 

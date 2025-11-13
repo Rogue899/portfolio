@@ -587,13 +587,7 @@ const WindowsXPDesktop = () => {
 
   // Icon dragging handlers
   const handleIconMouseDown = (e, iconId) => {
-    // Don't interfere with drag and drop for files/folders
-    const isDesktopItem = desktopItems.some(item => item.id === iconId);
-    if (isDesktopItem) {
-      // Let native drag and drop handle it
-      return;
-    }
-
+    // Allow dragging for all icons including desktop items
     const startX = e.clientX;
     const startY = e.clientY;
     
@@ -685,6 +679,58 @@ const WindowsXPDesktop = () => {
 
     const handleMouseUp = (e) => {
       const wasDragging = iconDragState.current.isDragging;
+      const draggedIconId = iconDragState.current.iconId;
+      
+      // Check if we dropped on recycle bin or folder
+      if (wasDragging && draggedIconId) {
+        // First check recycle bin by coordinates (more reliable)
+        const recycleBinElement = document.querySelector('[data-recycle-bin="true"]');
+        if (recycleBinElement) {
+          const binRect = recycleBinElement.getBoundingClientRect();
+          const mouseX = e.clientX;
+          const mouseY = e.clientY;
+          
+          if (mouseX >= binRect.left && mouseX <= binRect.right &&
+              mouseY >= binRect.top && mouseY <= binRect.bottom) {
+            // Check if it's a desktop item
+            const isDesktopItem = desktopItems.some(item => item.id === draggedIconId);
+            if (isDesktopItem) {
+              handleDeleteItem(draggedIconId);
+              // Clean up and return early
+              iconDragState.current.isDragging = false;
+              iconDragState.current.iconId = null;
+              iconDragState.current.hasMoved = false;
+              document.removeEventListener('mousemove', handleMouseMove);
+              document.removeEventListener('mouseup', handleMouseUp);
+              return;
+            }
+          }
+        }
+        
+        // Then check for folder drop
+        const elementBelow = document.elementFromPoint(e.clientX, e.clientY);
+        if (elementBelow) {
+          const folderIcon = elementBelow.closest('[data-icon-id]');
+          if (folderIcon) {
+            const folderId = folderIcon.getAttribute('data-icon-id');
+            const folderItem = desktopItems.find(i => i.id === folderId && i.type === 'folder');
+            const draggedItem = desktopItems.find(i => i.id === draggedIconId);
+            if (folderItem && draggedItem && folderItem.id !== draggedItem.id) {
+              // Move item into folder
+              setDesktopItems(prev => prev.map(i => 
+                i.id === draggedItem.id ? { ...i, parentFolderId: folderItem.id } : i
+              ));
+              // Update icon position to remove from desktop
+              setIconPositions(prev => {
+                const newPos = { ...prev };
+                delete newPos[draggedItem.id];
+                return newPos;
+              });
+            }
+          }
+        }
+      }
+      
       // Reset hasMoved after a short delay to allow double-click to check it
       if (wasDragging) {
         setTimeout(() => {
@@ -1146,7 +1192,7 @@ const WindowsXPDesktop = () => {
               key={item.id}
               className={`desktop-icon ${selectedIcons.has(item.id) ? 'selected' : ''}`}
               data-icon-id={item.id}
-              draggable={editingItem !== item.id ? "true" : "false"}
+              draggable="false"
               onMouseDown={(e) => {
                 if (!e.ctrlKey && !e.metaKey) {
                   setSelectedIcons(new Set([item.id]));
@@ -1161,50 +1207,12 @@ const WindowsXPDesktop = () => {
                     return next;
                   });
                 }
+                handleIconMouseDown(e, item.id);
               }}
               style={{
                 position: 'absolute',
                 left: iconPositions[item.id]?.x || item.x || 20,
                 top: iconPositions[item.id]?.y || item.y || 20
-              }}
-              onDragStart={(e) => {
-                if (editingItem === item.id) {
-                  e.preventDefault();
-                  return;
-                }
-                e.dataTransfer.setData('text/plain', item.id);
-                e.dataTransfer.effectAllowed = 'move';
-                e.stopPropagation();
-              }}
-              onDragEnd={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-              }}
-              onDragOver={(e) => {
-                if (item.type === 'folder') {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  e.dataTransfer.dropEffect = 'move';
-                }
-              }}
-              onDrop={(e) => {
-                if (item.type === 'folder') {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  const draggedItemId = e.dataTransfer.getData('text/plain');
-                  if (draggedItemId && draggedItemId !== item.id) {
-                    // Move item into folder
-                    setDesktopItems(prev => prev.map(i => 
-                      i.id === draggedItemId ? { ...i, parentFolderId: item.id } : i
-                    ));
-                    // Update icon position to remove from desktop
-                    setIconPositions(prev => {
-                      const newPos = { ...prev };
-                      delete newPos[draggedItemId];
-                      return newPos;
-                    });
-                  }
-                }
               }}
               onDoubleClick={(e) => {
                 if (editingItem === item.id) return;
@@ -1426,6 +1434,8 @@ const WindowsXPDesktop = () => {
 
           {/* Recycle Bin */}
           <div
+            className="recycle-bin-wrapper"
+            data-recycle-bin="true"
             style={{
               position: 'absolute',
               bottom: 20,
@@ -1451,6 +1461,11 @@ const WindowsXPDesktop = () => {
             onCreateFile={contextMenu.itemId ? null : handleCreateFile}
             onCreateFolder={contextMenu.itemId ? null : handleCreateFolder}
             onRename={contextMenu.itemId ? handleRename : null}
+            onDelete={contextMenu.itemId ? () => {
+              handleDeleteItem(contextMenu.itemId);
+              setContextMenu(null);
+            } : null}
+            onRefresh={contextMenu.itemId ? null : () => window.location.reload()}
             isItemMenu={!!contextMenu.itemId}
           />
         )}

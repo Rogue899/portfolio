@@ -1096,7 +1096,6 @@ const WindowsXPDesktop = () => {
           e.dataTransfer.clearData();
         }}
       >
-        <div className="birthday-text">HAPPY BIRTHDAY YARA</div>
         {/* Desktop Icons */}
         <div className="desktop-icons">
           {/* Selection Box */}

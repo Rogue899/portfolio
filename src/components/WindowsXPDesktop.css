@@ -89,53 +89,6 @@
   position: relative;
 }
 
-.birthday-text {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 48px;
-  font-weight: bold;
-  color: #8b0066;
-  text-shadow: 
-    2px 2px 0px #66004d,
-    4px 4px 0px #8b0066,
-    0px 0px 10px rgba(139, 0, 102, 0.5);
-  font-family: 'Courier New', monospace;
-  letter-spacing: 4px;
-  image-rendering: pixelated;
-  image-rendering: -moz-crisp-edges;
-  image-rendering: crisp-edges;
-  text-transform: uppercase;
-  z-index: 0;
-  pointer-events: none;
-  animation: pixelate 0.1s infinite;
-}
-
-@keyframes pixelate {
-  0%, 100% {
-    text-shadow: 
-      2px 2px 0px #66004d,
-      4px 4px 0px #8b0066,
-      0px 0px 10px rgba(139, 0, 102, 0.5);
-  }
-  50% {
-    text-shadow: 
-      3px 3px 0px #66004d,
-      5px 5px 0px #8b0066,
-      0px 0px 10px rgba(139, 0, 102, 0.5);
-  }
-}
-
-@media (max-width: 768px) {
-  .birthday-text {
-    top: 40%;
-    left: 55%;
-    transform: translate(-50%, -50%);
-    font-size: 32px;
-    letter-spacing: 2px;
-  }
-}
 
 .desktop-icons {
   position: relative;

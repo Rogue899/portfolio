@@ -122,25 +122,24 @@ const FileEditor = ({ fileId, fileName, onClose, onSave }) => {
         throw new Error(data.error || 'Failed to unlock file');
       }
       
-      // Password correct - file is now unlocked, reload content
-      const getResponse = await fetch(apiUrl, { headers });
+      // Password correct - fetch content with password
+      const getResponse = await fetch(`${apiUrl}?unlockPassword=${encodeURIComponent(unlockPassword)}`, { headers });
       const fileData = await getResponse.json();
       
-      if (fileData.isLocked) {
-        // Still locked - need to fetch with unlock password
-        // Actually, we just unlocked it by saving, so it should be unlocked now
-        // Let's try fetching again
-        const retryResponse = await fetch(apiUrl, { headers });
-        const retryData = await retryResponse.json();
-        setContent(retryData.content || '');
-        setIsLocked(retryData.isLocked || false);
-      } else {
-        setContent(fileData.content || '');
-        setIsLocked(false);
+      if (fileData.error) {
+        setNotification({
+          title: 'Error',
+          message: fileData.error || 'Failed to unlock file',
+          type: 'error'
+        });
+        setSaving(false);
+        return;
       }
       
+      setContent(fileData.content || '');
+      setIsLocked(true); // Still locked, but we have the password
       setShowPasswordPrompt(false);
-      setUnlockPassword('');
+      // Keep unlockPassword in state so we can use it for saving
       setSaving(false);
     } catch (error) {
       setSaving(false);

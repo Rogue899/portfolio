@@ -115,6 +115,8 @@ export default async function handler(req, res) {
 
     if (req.method === 'GET') {
       // Get file content - files are public, find by fileId only (no userId filter)
+      const { unlockPassword } = req.query;
+      
       let file = await filesCollection.findOne({
         fileId: fileId
       });
@@ -123,11 +125,45 @@ export default async function handler(req, res) {
         // Check if file is password protected
         const isLocked = !!file.passwordHash;
         
+        if (isLocked) {
+          // File is locked - check if password is provided
+          if (!unlockPassword) {
+            return res.status(200).json({
+              fileId: file.fileId,
+              fileName: file.fileName,
+              content: null, // Don't return content if locked
+              isLocked: true,
+              createdAt: file.createdAt,
+              updatedAt: file.updatedAt
+            });
+          }
+          
+          // Verify password
+          const isValidPassword = await bcrypt.compare(unlockPassword, file.passwordHash);
+          if (!isValidPassword) {
+            return res.status(401).json({
+              error: 'Incorrect password',
+              isLocked: true
+            });
+          }
+          
+          // Password correct - return content
+          return res.status(200).json({
+            fileId: file.fileId,
+            fileName: file.fileName,
+            content: file.content,
+            isLocked: true, // Still locked, but password verified
+            createdAt: file.createdAt,
+            updatedAt: file.updatedAt
+          });
+        }
+        
+        // File is not locked - return content
         return res.status(200).json({
           fileId: file.fileId,
           fileName: file.fileName,
-          content: isLocked ? null : file.content, // Don't return content if locked
-          isLocked: isLocked,
+          content: file.content,
+          isLocked: false,
           createdAt: file.createdAt,
           updatedAt: file.updatedAt
         });

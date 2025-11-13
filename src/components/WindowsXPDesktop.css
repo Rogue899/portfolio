@@ -23,17 +23,17 @@
   background: 
     repeating-linear-gradient(
       0deg,
-      #0080ff 0px,
-      #0080ff 2px,
-      #005ce6 2px,
-      #005ce6 4px
+      #4da6ff 0px,
+      #4da6ff 2px,
+      #3399ff 2px,
+      #3399ff 4px
     ),
     repeating-linear-gradient(
       90deg,
-      #0080ff 0px,
-      #0080ff 2px,
-      #005ce6 2px,
-      #005ce6 4px
+      #4da6ff 0px,
+      #4da6ff 2px,
+      #3399ff 2px,
+      #3399ff 4px
     );
   background-size: 4px 4px;
 }

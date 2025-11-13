@@ -310,61 +310,70 @@ app.get('/api/files/:fileId', async (req, res) => {
     }
 
     const { fileId } = req.params;
-    // Try to get userId from token if available, otherwise use 'guest'
-    let userId = 'guest';
-    try {
-      const token = extractToken(req);
-      if (token) {
-        const jwtSecret = process.env.JWT_SECRET;
-        const jwtIssuer = process.env.JWT_ISSUER || 'swiftserve';
-        const jwtAudience = process.env.JWT_AUDIENCE || 'swiftserve-users';
-        const decoded = jwt.verify(token, jwtSecret, {
-          issuer: jwtIssuer,
-          audience: jwtAudience,
-          algorithms: ['HS256']
-        });
-        if (decoded.type === 'access') {
-          userId = decoded.id;
-        }
-      }
-    } catch (error) {
-      // Not authenticated, use 'guest'
-    }
+    const { unlockPassword } = req.query;
 
     const client = await clientPromise;
     if (!client) {
-      // Should not reach here if MongoDB check passed, but just in case
       return res.status(500).json({ error: 'MongoDB not configured' });
     }
     const db = client.db();
     const filesCollection = db.collection('files');
 
-    // Try to find file for authenticated user first, then guest
     let file = await filesCollection.findOne({
-      fileId: fileId,
-      userId: userId
+      fileId: fileId
     });
-    
-    if (!file && userId !== 'guest') {
-      // Try guest file
-      file = await filesCollection.findOne({
-        fileId: fileId,
-        userId: 'guest'
-      });
-    }
 
     if (file) {
+      // Check if file is password protected
+      const isLocked = !!file.passwordHash;
+      
+      if (isLocked) {
+        // File is locked - check if password is provided
+        if (!unlockPassword) {
+          return res.json({
+            fileId: file.fileId,
+            fileName: file.fileName,
+            content: null, // Don't return content if locked
+            isLocked: true,
+            createdAt: file.createdAt,
+            updatedAt: file.updatedAt
+          });
+        }
+        
+        // Verify password
+        const isValidPassword = await bcrypt.compare(unlockPassword, file.passwordHash);
+        if (!isValidPassword) {
+          return res.status(401).json({
+            error: 'Incorrect password',
+            isLocked: true
+          });
+        }
+        
+        // Password correct - return content
+        return res.json({
+          fileId: file.fileId,
+          fileName: file.fileName,
+          content: file.content,
+          isLocked: true, // Still locked, but password verified
+          createdAt: file.createdAt,
+          updatedAt: file.updatedAt
+        });
+      }
+      
+      // File is not locked - return content
       return res.json({
         fileId: file.fileId,
         fileName: file.fileName,
         content: file.content,
+        isLocked: false,
         createdAt: file.createdAt,
         updatedAt: file.updatedAt
       });
     } else {
       return res.json({
         fileId: fileId,
-        content: ''
+        content: '',
+        isLocked: false
       });
     }
   } catch (error) {

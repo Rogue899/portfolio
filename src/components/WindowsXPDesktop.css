@@ -127,6 +127,16 @@
   }
 }
 
+@media (max-width: 768px) {
+  .birthday-text {
+    top: 40%;
+    left: 55%;
+    transform: translate(-50%, -50%);
+    font-size: 32px;
+    letter-spacing: 2px;
+  }
+}
+
 .desktop-icons {
   position: relative;
   width: 100%;

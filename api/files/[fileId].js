@@ -99,6 +99,9 @@ export default async function handler(req, res) {
     const filesCollection = db.collection('files');
     const fileHistoryCollection = db.collection('fileHistory');
 
+    console.log('Request method:', req.method);
+    console.log('Request body:', req.body);
+
     if (req.method === 'GET') {
       // Get file content - try authenticated user first, then guest
       let file = await filesCollection.findOne({
@@ -202,7 +205,8 @@ export default async function handler(req, res) {
       return res.status(200).json({ success: true, message: 'File deleted' });
     }
 
-      return res.status(405).json({ error: 'Method not allowed' });
+    console.log('No method matched, returning 405. Method was:', req.method);
+    return res.status(405).json({ error: 'Method not allowed', method: req.method });
     } catch (error) {
       // Don't return 401 for missing tokens - allow guest access
       console.error('File operation error:', error);

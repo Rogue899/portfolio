@@ -187,17 +187,31 @@ const WindowsXPDesktop = () => {
 
   const confirmShutdown = () => {
     setShutdownConfirm(false);
-    window.close();
-    // If window.close() doesn't work (some browsers block it), show a message
-    setTimeout(() => {
-      if (!document.hidden) {
-        setNotification({
-          title: 'Information',
-          message: 'Please close this tab/window manually.',
-          type: 'info'
-        });
-      }
-    }, 100);
+    // Try to close the window
+    try {
+      window.close();
+      // If window.close() doesn't work (some browsers block it), try alternative methods
+      setTimeout(() => {
+        if (!document.hidden && window.opener) {
+          // If opened by another window, close it
+          window.close();
+        } else if (!document.hidden) {
+          // Show message if can't close automatically
+          setNotification({
+            title: 'Information',
+            message: 'Please close this tab/window manually.',
+            type: 'info'
+          });
+        }
+      }, 100);
+    } catch (error) {
+      // If closing fails, show message
+      setNotification({
+        title: 'Information',
+        message: 'Please close this tab/window manually.',
+        type: 'info'
+      });
+    }
   };
 
   const cancelShutdown = () => {

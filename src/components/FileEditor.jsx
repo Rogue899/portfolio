@@ -52,12 +52,10 @@ const FileEditor = ({ fileId, fileName, onClose, onSave }) => {
             setShowPasswordPrompt(true);
             setContent('');
           } else {
-            // File is unlocked - show content and prompt to set password if empty
+            // File is unlocked - show content and prompt to set password
             setContent(data.content || '');
-            if (!data.content || data.content.trim() === '') {
-              // New/empty file - prompt to set password
-              setShowPasswordDialog(true);
-            }
+            // Always prompt to set password when opening unlocked file
+            setShowPasswordDialog(true);
           }
         }
         setLoading(false);

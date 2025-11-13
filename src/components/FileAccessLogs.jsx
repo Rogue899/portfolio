@@ -165,6 +165,16 @@ const FileAccessLogs = ({ fileId, onClose }) => {
                         {log.fileName && log.action === 'create' && (
                           <span className="message-filename"> ({log.fileName})</span>
                         )}
+                        {log.lengthChange !== null && log.lengthChange !== undefined && (
+                          <span className="message-change" style={{ 
+                            color: log.lengthChange > 0 ? '#4caf50' : log.lengthChange < 0 ? '#f44336' : '#666' 
+                          }}>
+                            {log.lengthChange > 0 ? ` +${log.lengthChange} chars` : log.lengthChange < 0 ? ` ${log.lengthChange} chars` : ' (no change)'}
+                          </span>
+                        )}
+                        {log.fileSize !== null && log.fileSize !== undefined && (
+                          <span className="message-size"> ({log.fileSize} chars)</span>
+                        )}
                       </div>
                       {!showIPHeader && (
                         <div className="message-time-inline" title={formatFullDate(log.timestamp)}>
@@ -172,11 +182,33 @@ const FileAccessLogs = ({ fileId, onClose }) => {
                         </div>
                       )}
                     </div>
-                    {log.userAgent && (
-                      <div className="message-meta" title={log.userAgent}>
-                        {log.userAgent.length > 60 ? log.userAgent.substring(0, 60) + '...' : log.userAgent}
-                      </div>
-                    )}
+                    <div className="message-meta-container">
+                      {log.browser && log.browser !== 'Unknown' && (
+                        <div className="message-meta-item">
+                          <span className="meta-label">Browser:</span> {log.browser}{log.browserVersion ? ` ${log.browserVersion}` : ''}
+                        </div>
+                      )}
+                      {log.os && log.os !== 'Unknown' && (
+                        <div className="message-meta-item">
+                          <span className="meta-label">OS:</span> {log.os} {log.device && log.device !== 'Desktop' && `(${log.device})`}
+                        </div>
+                      )}
+                      {log.referrer && (
+                        <div className="message-meta-item" title={log.referrer}>
+                          <span className="meta-label">From:</span> {log.referrer.length > 40 ? log.referrer.substring(0, 40) + '...' : log.referrer}
+                        </div>
+                      )}
+                      {log.acceptLanguage && (
+                        <div className="message-meta-item">
+                          <span className="meta-label">Language:</span> {log.acceptLanguage.split(',')[0].split(';')[0]}
+                        </div>
+                      )}
+                      {log.userAgent && (
+                        <div className="message-meta-item" title={log.userAgent}>
+                          <span className="meta-label">User Agent:</span> {log.userAgent.length > 50 ? log.userAgent.substring(0, 50) + '...' : log.userAgent}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 );
               })}

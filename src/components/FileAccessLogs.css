@@ -212,15 +212,39 @@
   white-space: nowrap;
 }
 
-.message-meta {
-  font-size: 9px;
-  color: #999;
+.message-meta-container {
   margin-left: 42px;
-  padding-left: 4px;
+  padding: 6px 0 0 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.message-meta-item {
+  font-size: 9px;
+  color: #666;
   font-style: italic;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.meta-label {
+  font-weight: bold;
+  color: #999;
+}
+
+.message-change {
+  font-size: 11px;
+  font-weight: 500;
+  margin-left: 4px;
+}
+
+.message-size {
+  font-size: 10px;
+  color: #999;
+  margin-left: 4px;
 }
 
 /* Mobile styles */

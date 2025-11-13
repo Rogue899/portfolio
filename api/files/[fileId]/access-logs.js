@@ -101,7 +101,18 @@ export default async function handler(req, res) {
           ipAddress: log.ipAddress,
           timestamp: log.timestamp,
           userAgent: log.userAgent,
-          fileName: log.fileName
+          fileName: log.fileName,
+          // Additional metadata
+          browser: log.browser,
+          browserVersion: log.browserVersion,
+          os: log.os,
+          device: log.device,
+          referrer: log.referrer,
+          origin: log.origin,
+          acceptLanguage: log.acceptLanguage,
+          fileSize: log.fileSize,
+          lengthChange: log.lengthChange,
+          previousSize: log.previousSize
         }))
       });
     } catch (error) {

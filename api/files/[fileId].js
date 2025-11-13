@@ -48,26 +48,30 @@ function verifyToken(req) {
 }
 
 export default async function handler(req, res) {
-  // Wrap everything in try-catch to ensure we always return JSON
+  console.log('===== HANDLER START =====');
+  
+  // Set headers first, before any potential errors
   try {
-    // Enable CORS
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, token');
     res.setHeader('Content-Type', 'application/json');
+  } catch (headerError) {
+    console.error('Error setting headers:', headerError);
+  }
 
-    console.log('===== FILE API CALLED =====');
-    console.log('Method:', req.method);
-    console.log('Query:', req.query);
-    console.log('Headers:', req.headers);
-    console.log('Body:', req.body);
+  console.log('Method:', req.method);
+  console.log('Query:', req.query);
 
-    if (req.method === 'OPTIONS') {
-      return res.status(200).end();
-    }
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
 
+  // Wrap everything in try-catch to ensure we always return JSON
+  try {
     try {
     const { fileId } = req.query;
+    console.log('FileId extracted:', fileId);
     
     // Log for debugging
     console.log('File API called:', { method: req.method, fileId, query: req.query });

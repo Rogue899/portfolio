@@ -82,10 +82,18 @@ export default async function handler(req, res) {
       }
     } catch (error) {
       console.error('MongoDB connection error:', error);
+      console.error('Error stack:', error.stack);
       return res.status(500).json({ 
         error: 'MongoDB connection failed',
-        message: error.message 
+        message: error.message,
+        details: process.env.NODE_ENV === 'development' ? error.stack : undefined
       });
+    }
+    
+    // Verify client is actually connected
+    if (!client || !client.db) {
+      console.error('MongoDB client is invalid');
+      return res.status(500).json({ error: 'MongoDB client invalid' });
     }
     
     const db = client.db();

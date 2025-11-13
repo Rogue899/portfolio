@@ -75,7 +75,12 @@ export default async function handler(req, res) {
 
     let client;
     try {
-      client = await clientPromise;
+      client = await Promise.race([
+        clientPromise,
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('MongoDB connection timeout')), 10000)
+        )
+      ]);
       if (!client) {
         console.error('MongoDB client is null - check MONGODB_URI environment variable');
         return res.status(500).json({ error: 'MongoDB not configured' });

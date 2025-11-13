@@ -28,7 +28,22 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Password must be at least 8 characters' });
     }
 
-    const client = await clientPromise;
+    let client;
+    try {
+      client = await Promise.race([
+        clientPromise,
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('MongoDB connection timeout')), 10000)
+        )
+      ]);
+    } catch (error) {
+      console.error('MongoDB connection error:', error);
+      return res.status(500).json({ 
+        error: 'MongoDB connection failed',
+        message: error.message 
+      });
+    }
+    
     if (!client) {
       console.error('MongoDB client is null - check MONGODB_URI environment variable');
       return res.status(500).json({ error: 'MongoDB not configured' });

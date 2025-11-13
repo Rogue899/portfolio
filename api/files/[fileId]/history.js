@@ -57,10 +57,24 @@ export default async function handler(req, res) {
     const userId = decoded.id; // Using 'id' to match your token payload
     const { fileId } = req.query;
 
-    const client = await clientPromise;
-    if (!client) {
-      console.error('MongoDB client is null - check MONGODB_URI environment variable');
-      return res.status(500).json({ error: 'MongoDB not configured' });
+    let client;
+    try {
+      client = await Promise.race([
+        clientPromise,
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('MongoDB connection timeout')), 10000)
+        )
+      ]);
+      if (!client) {
+        console.error('MongoDB client is null - check MONGODB_URI environment variable');
+        return res.status(500).json({ error: 'MongoDB not configured' });
+      }
+    } catch (error) {
+      console.error('MongoDB connection error:', error);
+      return res.status(500).json({ 
+        error: 'MongoDB connection failed',
+        message: error.message 
+      });
     }
     
     // Use database from connection string, or default to 'delivery_platform'

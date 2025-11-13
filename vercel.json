@@ -2,21 +2,15 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "framework": "vite",
-  "routes": [
-    {
-      "src": "/api/files/([^/]+)",
-      "dest": "/api/files/[fileId].js"
-    },
-    {
-      "src": "/api/files/([^/]+)/history",
-      "dest": "/api/files/[fileId]/history.js"
-    },
-    {
-      "src": "/api/(.*)",
-      "dest": "/api/$1"
-    }
-  ],
   "rewrites": [
+    {
+      "source": "/api/files/:fileId/history",
+      "destination": "/api/files/[fileId]/history.js"
+    },
+    {
+      "source": "/api/files/:fileId",
+      "destination": "/api/files/[fileId].js"
+    },
     {
       "source": "/(.*)",
       "destination": "/index.html"

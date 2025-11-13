@@ -1,4 +1,4 @@
-import connectToDatabase from '../../../../lib/mongodb.js';
+import connectToDatabase from '../../../lib/mongodb.js';
 import jwt from 'jsonwebtoken';
 
 // Helper function to extract token from headers (supports both formats)

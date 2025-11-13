@@ -68,6 +68,65 @@
   background-size: 40% 100%, 40% 100%, 100% 100%, 8px 8px;
 }
 
+/* Pink Birthday Theme */
+.desktop-background.theme-pink {
+  background: 
+    repeating-linear-gradient(
+      0deg,
+      #ffb6c1 0px,
+      #ffb6c1 2px,
+      #ff91a4 2px,
+      #ff91a4 4px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      #ffb6c1 0px,
+      #ffb6c1 2px,
+      #ff91a4 2px,
+      #ff91a4 4px
+    );
+  background-size: 4px 4px;
+  position: relative;
+}
+
+.birthday-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 48px;
+  font-weight: bold;
+  color: #ff1493;
+  text-shadow: 
+    2px 2px 0px #ff69b4,
+    4px 4px 0px #ff1493,
+    0px 0px 10px rgba(255, 20, 147, 0.5);
+  font-family: 'Courier New', monospace;
+  letter-spacing: 4px;
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+  text-transform: uppercase;
+  z-index: 0;
+  pointer-events: none;
+  animation: pixelate 0.1s infinite;
+}
+
+@keyframes pixelate {
+  0%, 100% {
+    text-shadow: 
+      2px 2px 0px #ff69b4,
+      4px 4px 0px #ff1493,
+      0px 0px 10px rgba(255, 20, 147, 0.5);
+  }
+  50% {
+    text-shadow: 
+      3px 3px 0px #ff69b4,
+      5px 5px 0px #ff1493,
+      0px 0px 10px rgba(255, 20, 147, 0.5);
+  }
+}
+
 .desktop-icons {
   position: relative;
   width: 100%;

@@ -26,7 +26,7 @@ const WindowsXPDesktop = () => {
   const [editValue, setEditValue] = useState('');
   const [selectedIcons, setSelectedIcons] = useState(new Set());
   const [selectionBox, setSelectionBox] = useState(null);
-  const [theme, setTheme] = useState('classic-blue'); // classic-blue, bliss, berserker
+  const [theme, setTheme] = useState('pink'); // classic-blue, bliss, berserker, pink
   const [snapToGrid, setSnapToGrid] = useState(true);
   const [clipboard, setClipboard] = useState(null);
   const dragState = useRef({ isDragging: false, windowId: null, offsetX: 0, offsetY: 0 });
@@ -951,6 +951,7 @@ const WindowsXPDesktop = () => {
           e.dataTransfer.clearData();
         }}
       >
+        <div className="birthday-text">HAPPY BIRTHDAY YARA</div>
         {/* Desktop Icons */}
         <div className="desktop-icons">
           {/* Selection Box */}

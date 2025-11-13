@@ -57,7 +57,7 @@
   50% { opacity: 0.5; }
 }
 
-.editor-save-btn {
+.editor-history-btn {
   background: linear-gradient(to bottom, #ece9d8 0%, #d4d0c8 100%);
   border: 1px outset #ece9d8;
   padding: 4px 12px;
@@ -66,16 +66,36 @@
   font-weight: bold;
   font-family: 'Tahoma', 'MS Sans Serif', sans-serif;
   color: #000;
+  margin-right: 5px;
+}
+
+.editor-history-btn:hover {
+  background: linear-gradient(to bottom, #f5f2e5 0%, #e5e1d8 100%);
+}
+
+.editor-history-btn:active {
+  border: 1px inset #ece9d8;
+}
+
+.editor-save-btn {
+  background: linear-gradient(to bottom, #245edb 0%, #1941a5 100%);
+  border: 1px outset #245edb;
+  padding: 4px 12px;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: bold;
+  font-family: 'Tahoma', 'MS Sans Serif', sans-serif;
+  color: white;
   min-width: 60px;
 }
 
 .editor-save-btn:hover:not(:disabled) {
-  background: linear-gradient(to bottom, #f5f2e5 0%, #e5e1d8 100%);
+  background: linear-gradient(to bottom, #346edb 0%, #2951b5 100%);
 }
 
 .editor-save-btn:active:not(:disabled) {
-  border: 1px inset #ece9d8;
-  background: linear-gradient(to bottom, #d4d0c8 0%, #c4c0b8 100%);
+  border: 1px inset #245edb;
+  background: linear-gradient(to bottom, #1941a5 0%, #245edb 100%);
 }
 
 .editor-save-btn:disabled {

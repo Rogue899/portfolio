@@ -1,0 +1,134 @@
+.file-history-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 20000;
+  font-family: 'Tahoma', 'MS Sans Serif', sans-serif;
+}
+
+.file-history-modal {
+  background: #ece9d8;
+  border: 2px outset #ece9d8;
+  box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.5);
+  width: 80%;
+  max-width: 800px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-titlebar {
+  background: linear-gradient(to bottom, #245edb 0%, #1941a5 100%);
+  color: white;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: bold;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-titlebar .modal-close-button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 0 5px;
+}
+
+.modal-content {
+  padding: 20px;
+  overflow-y: auto;
+  color: #333;
+  font-size: 12px;
+}
+
+.loading, .no-history {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+}
+
+.error-message {
+  color: #d32f2f;
+  padding: 10px;
+  background: #ffebee;
+  border: 1px solid #d32f2f;
+  margin-bottom: 10px;
+}
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.history-item {
+  border: 1px solid #999;
+  padding: 10px;
+  background: white;
+}
+
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid #ccc;
+}
+
+.history-version {
+  font-weight: bold;
+  color: #245edb;
+}
+
+.history-date {
+  color: #666;
+  font-size: 11px;
+}
+
+.history-content {
+  margin: 10px 0;
+}
+
+.history-content pre {
+  margin: 0;
+  padding: 10px;
+  background: #f5f5f5;
+  border: 1px inset #ece9d8;
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.restore-button {
+  background: linear-gradient(to bottom, #245edb 0%, #1941a5 100%);
+  color: white;
+  border: 1px outset #245edb;
+  padding: 4px 12px;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: bold;
+  font-family: 'Tahoma', 'MS Sans Serif', sans-serif;
+  margin-top: 5px;
+}
+
+.restore-button:hover {
+  background: linear-gradient(to bottom, #346edb 0%, #2951b5 100%);
+}
+
+.restore-button:active {
+  border: 1px inset #245edb;
+}
+

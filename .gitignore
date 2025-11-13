@@ -26,3 +26,7 @@ dist-ssr
 # Backend data
 desktop-data.json
 files/
+
+# Environment variables
+.env.local
+.env

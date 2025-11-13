@@ -11,6 +11,8 @@ import Browser from './Browser';
 import DeleteConfirmModal from './DeleteConfirmModal';
 import NotificationModal from './NotificationModal';
 import Confetti from './Confetti';
+import LoginModal from './LoginModal';
+import FolderView from './FolderView';
 
 const WindowsXPDesktop = () => {
   const [openWindows, setOpenWindows] = useState([]);
@@ -31,6 +33,8 @@ const WindowsXPDesktop = () => {
   const [snapToGrid, setSnapToGrid] = useState(true);
   const [clipboard, setClipboard] = useState(null);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [user, setUser] = useState(null);
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const dragState = useRef({ isDragging: false, windowId: null, offsetX: 0, offsetY: 0 });
   const iconDragState = useRef({ isDragging: false, iconId: null, offsetX: 0, offsetY: 0, hasMoved: false });
   const selectionState = useRef({ isSelecting: false, startX: 0, startY: 0 });
@@ -214,6 +218,45 @@ const WindowsXPDesktop = () => {
     }, 1000);
     return () => clearInterval(timer);
   }, []);
+
+  // Check for existing authentication on mount
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    const storedToken = localStorage.getItem('authToken');
+    
+    if (storedUser && storedToken) {
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (error) {
+        // Invalid user data, clear it
+        localStorage.removeItem('user');
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('refreshToken');
+      }
+    }
+  }, []);
+
+  const handleLogin = (userData, token) => {
+    setUser(userData);
+    setShowLoginModal(false);
+    setNotification({
+      title: 'Success',
+      message: `Welcome, ${userData.name || userData.email}!`,
+      type: 'success'
+    });
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('refreshToken');
+    setUser(null);
+    setNotification({
+      title: 'Logged Out',
+      message: 'You have been signed out.',
+      type: 'info'
+    });
+  };
 
   // Window dragging handlers
   const handleMouseDown = (e, windowId) => {
@@ -715,20 +758,28 @@ const WindowsXPDesktop = () => {
       name: fileName,
       type: 'file',
       x: finalX,
-      y: finalY
+      y: finalY,
+      parentFolderId: null // Files created on desktop are not in folders
     };
     
-    // Create empty file on backend
+    // Create empty file on backend (public - no auth required)
     const apiUrl = import.meta.env.PROD 
       ? `/api/files/${fileId}`
       : `http://localhost:3001/api/files/${fileId}`;
     
     try {
+      const token = localStorage.getItem('authToken');
+      const headers = {
+        'Content-Type': 'application/json'
+      };
+      if (token) {
+        headers['token'] = token;
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      
       await fetch(apiUrl, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: headers,
         body: JSON.stringify({
           fileName: fileName,
           content: ''
@@ -770,7 +821,8 @@ const WindowsXPDesktop = () => {
       name: folderName,
       type: 'folder',
       x: finalX,
-      y: finalY
+      y: finalY,
+      parentFolderId: null // Folders created on desktop are not in folders
     };
     setDesktopItems(prev => [...prev, newFolder]);
     setIconPositions(prev => ({
@@ -1088,8 +1140,8 @@ const WindowsXPDesktop = () => {
             </div>
           ))}
 
-          {/* Created Files and Folders */}
-          {desktopItems.map(item => (
+          {/* Created Files and Folders - only show items not in folders */}
+          {desktopItems.filter(item => !item.parentFolderId).map(item => (
             <div
               key={item.id}
               className={`desktop-icon ${selectedIcons.has(item.id) ? 'selected' : ''}`}
@@ -1128,6 +1180,32 @@ const WindowsXPDesktop = () => {
                 e.preventDefault();
                 e.stopPropagation();
               }}
+              onDragOver={(e) => {
+                if (item.type === 'folder') {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  e.dataTransfer.dropEffect = 'move';
+                }
+              }}
+              onDrop={(e) => {
+                if (item.type === 'folder') {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  const draggedItemId = e.dataTransfer.getData('text/plain');
+                  if (draggedItemId && draggedItemId !== item.id) {
+                    // Move item into folder
+                    setDesktopItems(prev => prev.map(i => 
+                      i.id === draggedItemId ? { ...i, parentFolderId: item.id } : i
+                    ));
+                    // Update icon position to remove from desktop
+                    setIconPositions(prev => {
+                      const newPos = { ...prev };
+                      delete newPos[draggedItemId];
+                      return newPos;
+                    });
+                  }
+                }
+              }}
               onDoubleClick={(e) => {
                 if (editingItem === item.id) return;
                 handleIconDoubleClick(e, () => {
@@ -1148,9 +1226,163 @@ const WindowsXPDesktop = () => {
                         }}
                       />
                     );
-                  } else {
-                    // Folder double-click (could open folder view in future)
-                    // For now, do nothing
+                  } else if (item.type === 'folder') {
+                    // Open folder view
+                    openWindow(
+                      `folder_${item.id}`,
+                      item.name,
+                      <FolderView
+                        folderId={item.id}
+                        folderName={item.name}
+                        desktopItems={desktopItems}
+                        onCreateFile={(parentFolderId) => {
+                          const fileName = generateUniqueName('file');
+                          const fileId = `file_${Date.now()}`;
+                          const newFile = {
+                            id: fileId,
+                            name: fileName,
+                            type: 'file',
+                            x: 0,
+                            y: 0,
+                            parentFolderId: parentFolderId
+                          };
+                          setDesktopItems(prev => [...prev, newFile]);
+                          
+                          // Create empty file on backend
+                          const apiUrl = import.meta.env.PROD 
+                            ? `/api/files/${fileId}`
+                            : `http://localhost:3001/api/files/${fileId}`;
+                          
+                          try {
+                            const token = localStorage.getItem('authToken');
+                            const headers = {
+                              'Content-Type': 'application/json'
+                            };
+                            if (token) {
+                              headers['token'] = token;
+                              headers['Authorization'] = `Bearer ${token}`;
+                            }
+                            
+                            fetch(apiUrl, {
+                              method: 'POST',
+                              headers: headers,
+                              body: JSON.stringify({
+                                fileName: fileName,
+                                content: ''
+                              })
+                            });
+                          } catch (error) {
+                            // Continue anyway
+                          }
+                        }}
+                        onCreateFolder={(parentFolderId) => {
+                          const folderName = generateUniqueName('folder');
+                          const newFolder = {
+                            id: `folder_${Date.now()}`,
+                            name: folderName,
+                            type: 'folder',
+                            x: 0,
+                            y: 0,
+                            parentFolderId: parentFolderId
+                          };
+                          setDesktopItems(prev => [...prev, newFolder]);
+                        }}
+                        onItemDoubleClick={(folderItem) => {
+                          if (folderItem.type === 'file') {
+                            openWindow(
+                              `file_${folderItem.id}`,
+                              folderItem.name,
+                              <FileEditor
+                                fileId={folderItem.id}
+                                fileName={folderItem.name}
+                                onClose={() => closeWindow(`file_${folderItem.id}`)}
+                                onSave={() => {}}
+                              />
+                            );
+                          } else if (folderItem.type === 'folder') {
+                            // Nested folder - open it
+                            openWindow(
+                              `folder_${folderItem.id}`,
+                              folderItem.name,
+                              <FolderView
+                                folderId={folderItem.id}
+                                folderName={folderItem.name}
+                                desktopItems={desktopItems}
+                                onCreateFile={(parentFolderId) => {
+                                  const fileName = generateUniqueName('file');
+                                  const fileId = `file_${Date.now()}`;
+                                  const newFile = {
+                                    id: fileId,
+                                    name: fileName,
+                                    type: 'file',
+                                    x: 0,
+                                    y: 0,
+                                    parentFolderId: parentFolderId
+                                  };
+                                  setDesktopItems(prev => [...prev, newFile]);
+                                  
+                                  const apiUrl = import.meta.env.PROD 
+                                    ? `/api/files/${fileId}`
+                                    : `http://localhost:3001/api/files/${fileId}`;
+                                  
+                                  try {
+                                    const token = localStorage.getItem('authToken');
+                                    const headers = {
+                                      'Content-Type': 'application/json'
+                                    };
+                                    if (token) {
+                                      headers['token'] = token;
+                                      headers['Authorization'] = `Bearer ${token}`;
+                                    }
+                                    
+                                    fetch(apiUrl, {
+                                      method: 'POST',
+                                      headers: headers,
+                                      body: JSON.stringify({
+                                        fileName: fileName,
+                                        content: ''
+                                      })
+                                    });
+                                  } catch (error) {
+                                    // Continue anyway
+                                  }
+                                }}
+                                onCreateFolder={(parentFolderId) => {
+                                  const folderName = generateUniqueName('folder');
+                                  const newFolder = {
+                                    id: `folder_${Date.now()}`,
+                                    name: folderName,
+                                    type: 'folder',
+                                    x: 0,
+                                    y: 0,
+                                    parentFolderId: parentFolderId
+                                  };
+                                  setDesktopItems(prev => [...prev, newFolder]);
+                                }}
+                                onItemDoubleClick={(nestedItem) => {
+                                  if (nestedItem.type === 'file') {
+                                    openWindow(
+                                      `file_${nestedItem.id}`,
+                                      nestedItem.name,
+                                      <FileEditor
+                                        fileId={nestedItem.id}
+                                        fileName={nestedItem.name}
+                                        onClose={() => closeWindow(`file_${nestedItem.id}`)}
+                                        onSave={() => {}}
+                                      />
+                                    );
+                                  }
+                                }}
+                                onItemDelete={handleDeleteItem}
+                                onItemRename={handleRename}
+                              />
+                            );
+                          }
+                        }}
+                        onItemDelete={handleDeleteItem}
+                        onItemRename={handleRename}
+                      />
+                    );
                   }
                 });
               }}
@@ -1303,7 +1535,7 @@ const WindowsXPDesktop = () => {
       {startMenuOpen && (
         <div className="start-menu" onClick={(e) => e.stopPropagation()}>
           <div className="start-menu-header">
-            <div className="start-menu-user">Guest</div>
+            <div className="start-menu-user">{user ? (user.name || user.email) : 'Guest'}</div>
           </div>
           <div className="start-menu-items">
             <div 
@@ -1333,12 +1565,31 @@ const WindowsXPDesktop = () => {
             ))}
           </div>
           <div className="start-menu-footer">
+            {user ? (
+              <button className="start-menu-shutdown" onClick={handleLogout}>
+                <span className="shutdown-icon">🚪</span>
+                <span>Sign Out</span>
+              </button>
+            ) : (
+              <button className="start-menu-shutdown" onClick={() => setShowLoginModal(true)}>
+                <span className="shutdown-icon">🔐</span>
+                <span>Sign In</span>
+              </button>
+            )}
             <button className="start-menu-shutdown" onClick={handleShutdown}>
               <span className="shutdown-icon">⏻</span>
               <span>Turn Off Computer</span>
             </button>
           </div>
         </div>
+      )}
+
+      {/* Login Modal */}
+      {showLoginModal && (
+        <LoginModal
+          onLogin={handleLogin}
+          onClose={() => setShowLoginModal(false)}
+        />
       )}
 
       {/* Taskbar */}

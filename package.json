@@ -11,8 +11,12 @@
     "server": "node server.js"
   },
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
     "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongodb": "^6.3.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-pageflip": "^2.0.3"

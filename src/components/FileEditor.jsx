@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import NotificationModal from './NotificationModal';
+import FileHistory from './FileHistory';
 import './FileEditor.css';
 
 const FileEditor = ({ fileId, fileName, onClose, onSave }) => {
@@ -8,14 +9,26 @@ const FileEditor = ({ fileId, fileName, onClose, onSave }) => {
   const [saving, setSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
   const [notification, setNotification] = useState(null);
+  const [showHistory, setShowHistory] = useState(false);
 
   useEffect(() => {
     // Load file content from backend
+    const token = localStorage.getItem('authToken');
     const apiUrl = import.meta.env.PROD 
       ? `/api/files/${fileId}`
       : `http://localhost:3001/api/files/${fileId}`;
     
-    fetch(apiUrl)
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+    
+    if (token) {
+      // Support both header formats (token header and Authorization Bearer)
+      headers['token'] = token;
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    
+    fetch(apiUrl, { headers })
       .then(res => {
         if (res.status === 404) {
           // File doesn't exist yet, start with empty content
@@ -48,16 +61,25 @@ const FileEditor = ({ fileId, fileName, onClose, onSave }) => {
 
   const handleSave = async () => {
     setSaving(true);
+    const token = localStorage.getItem('authToken');
     const apiUrl = import.meta.env.PROD 
       ? `/api/files/${fileId}`
       : `http://localhost:3001/api/files/${fileId}`;
     
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+    
+    if (token) {
+      // Support both header formats (token header and Authorization Bearer)
+      headers['token'] = token;
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    
     try {
       const response = await fetch(apiUrl, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify({
           fileName: fileName,
           content: content
@@ -105,6 +127,15 @@ const FileEditor = ({ fileId, fileName, onClose, onSave }) => {
           </div>
           <div className="editor-actions">
             {hasChanges && <span className="unsaved-indicator">●</span>}
+            {localStorage.getItem('authToken') && (
+              <button 
+                className="editor-history-btn" 
+                onClick={() => setShowHistory(true)}
+                title="View file history"
+              >
+                History
+              </button>
+            )}
             <button 
               className="editor-save-btn" 
               onClick={handleSave}
@@ -130,6 +161,17 @@ const FileEditor = ({ fileId, fileName, onClose, onSave }) => {
           message={notification.message}
           type={notification.type}
           onClose={() => setNotification(null)}
+        />
+      )}
+      {showHistory && localStorage.getItem('authToken') && (
+        <FileHistory
+          fileId={fileId}
+          onClose={() => setShowHistory(false)}
+          onRestore={(restoredContent) => {
+            setContent(restoredContent);
+            setHasChanges(true);
+            setShowHistory(false);
+          }}
         />
       )}
     </>

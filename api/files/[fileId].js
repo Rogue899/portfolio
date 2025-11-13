@@ -173,6 +173,9 @@ export default async function handler(req, res) {
             updatedAt: new Date(),
             version: version
           },
+          $unset: {
+            userId: "" // Remove userId field if it exists (for existing files)
+          },
           $setOnInsert: {
             createdAt: new Date()
           }

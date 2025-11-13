@@ -1,4 +1,4 @@
-import clientPromise from '../../../../lib/mongodb';
+import connectToDatabase from '../../../../lib/mongodb';
 import jwt from 'jsonwebtoken';
 
 // Helper function to extract token from headers (supports both formats)
@@ -57,18 +57,14 @@ export default async function handler(req, res) {
     const userId = decoded.id; // Using 'id' to match your token payload
     const { fileId } = req.query;
 
-    let client;
+    let db;
     try {
-      client = await Promise.race([
-        clientPromise,
-        new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('MongoDB connection timeout')), 10000)
-        )
-      ]);
-      if (!client) {
-        console.error('MongoDB client is null - check MONGODB_URI environment variable');
+      const { db: database } = await connectToDatabase();
+      if (!database) {
+        console.error('MongoDB database is null');
         return res.status(500).json({ error: 'MongoDB not configured' });
       }
+      db = database;
     } catch (error) {
       console.error('MongoDB connection error:', error);
       return res.status(500).json({ 
@@ -77,9 +73,6 @@ export default async function handler(req, res) {
       });
     }
     
-    // Use database from connection string, or default to 'delivery_platform'
-    const dbName = process.env.MONGODB_DB_NAME || undefined; // undefined = use from connection string
-    const db = client.db(dbName);
     const fileHistoryCollection = db.collection('fileHistory');
 
     const history = await fileHistoryCollection

@@ -1,4 +1,4 @@
-import clientPromise from '../../../lib/mongodb';
+import connectToDatabase from '../../../lib/mongodb';
 import jwt from 'jsonwebtoken';
 
 // Helper function to extract token from headers (supports both formats)
@@ -79,37 +79,23 @@ export default async function handler(req, res) {
       // Not authenticated, use 'guest'
     }
 
-    let client;
+    let db;
     try {
-      client = await Promise.race([
-        clientPromise,
-        new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('MongoDB connection timeout')), 10000)
-        )
-      ]);
-      if (!client) {
-        console.error('MongoDB client is null - check MONGODB_URI environment variable');
+      const { db: database } = await connectToDatabase();
+      if (!database) {
+        console.error('MongoDB database is null');
         return res.status(500).json({ error: 'MongoDB not configured' });
       }
+      db = database;
     } catch (error) {
       console.error('MongoDB connection error:', error);
       console.error('Error stack:', error.stack);
       return res.status(500).json({ 
         error: 'MongoDB connection failed',
-        message: error.message,
-        details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        message: error.message
       });
     }
     
-    // Verify client is actually connected
-    if (!client || !client.db) {
-      console.error('MongoDB client is invalid');
-      return res.status(500).json({ error: 'MongoDB client invalid' });
-    }
-    
-    // Use database from connection string, or default to 'delivery_platform'
-    const dbName = process.env.MONGODB_DB_NAME || undefined; // undefined = use from connection string
-    const db = client.db(dbName);
     const filesCollection = db.collection('files');
     const fileHistoryCollection = db.collection('fileHistory');
 

@@ -1,4 +1,4 @@
-import clientPromise from '../../lib/mongodb';
+import connectToDatabase from '../../lib/mongodb';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
@@ -31,14 +31,14 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Password must be at least 8 characters' });
     }
 
-    let client;
+    let db;
     try {
-      client = await Promise.race([
-        clientPromise,
-        new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('MongoDB connection timeout')), 10000)
-        )
-      ]);
+      const { db: database } = await connectToDatabase();
+      if (!database) {
+        console.error('MongoDB database is null');
+        return res.status(500).json({ error: 'MongoDB not configured' });
+      }
+      db = database;
     } catch (error) {
       console.error('MongoDB connection error:', error);
       return res.status(500).json({ 
@@ -47,14 +47,6 @@ export default async function handler(req, res) {
       });
     }
     
-    if (!client) {
-      console.error('MongoDB client is null - check MONGODB_URI environment variable');
-      return res.status(500).json({ error: 'MongoDB not configured' });
-    }
-    
-    // Use database from connection string, or default to 'delivery_platform'
-    const dbName = process.env.MONGODB_DB_NAME || undefined; // undefined = use from connection string
-    const db = client.db(dbName);
     const usersCollection = db.collection('users');
 
     // Find user by email

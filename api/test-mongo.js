@@ -1,4 +1,4 @@
-import clientPromise from '../lib/mongodb';
+import connectToDatabase from '../lib/mongodb';
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -6,17 +6,16 @@ export default async function handler(req, res) {
 
   try {
     console.log('Testing MongoDB connection...');
-    const client = await clientPromise;
+    const { client, db } = await connectToDatabase();
     
-    if (!client) {
+    if (!db) {
       return res.status(500).json({ 
-        error: 'MongoDB client is null',
+        error: 'MongoDB database is null',
         mongodb_uri_set: !!process.env.MONGODB_URI 
       });
     }
 
     // Test actual connection
-    const db = client.db();
     const testCollection = db.collection('test');
     
     // Try a simple operation
@@ -32,7 +31,7 @@ export default async function handler(req, res) {
       success: true,
       message: 'MongoDB connection successful',
       database: db.databaseName,
-      client_connected: client.topology?.isConnected() || false
+      client_connected: client?.topology?.isConnected() || false
     });
   } catch (error) {
     console.error('MongoDB test error:', error);

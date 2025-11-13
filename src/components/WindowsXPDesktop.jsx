@@ -10,6 +10,7 @@ import RecycleBin from './RecycleBin';
 import Browser from './Browser';
 import DeleteConfirmModal from './DeleteConfirmModal';
 import NotificationModal from './NotificationModal';
+import Confetti from './Confetti';
 
 const WindowsXPDesktop = () => {
   const [openWindows, setOpenWindows] = useState([]);
@@ -29,6 +30,7 @@ const WindowsXPDesktop = () => {
   const [theme, setTheme] = useState('pink'); // classic-blue, bliss, berserker, pink
   const [snapToGrid, setSnapToGrid] = useState(true);
   const [clipboard, setClipboard] = useState(null);
+  const [showConfetti, setShowConfetti] = useState(false);
   const dragState = useRef({ isDragging: false, windowId: null, offsetX: 0, offsetY: 0 });
   const iconDragState = useRef({ isDragging: false, iconId: null, offsetX: 0, offsetY: 0, hasMoved: false });
   const selectionState = useRef({ isSelecting: false, startX: 0, startY: 0 });
@@ -277,7 +279,39 @@ const WindowsXPDesktop = () => {
           setIconPositions(data.iconPositions);
         }
         if (data.desktopItems) {
-          setDesktopItems(data.desktopItems);
+          // Check if gift file already exists
+          const hasGift = data.desktopItems.some(item => item.id === 'gift-file');
+          if (!hasGift) {
+            // Add gift file if it doesn't exist
+            const giftFile = {
+              id: 'gift-file',
+              name: 'gift',
+              type: 'file',
+              x: 120,
+              y: 20
+            };
+            setDesktopItems([...data.desktopItems, giftFile]);
+            setIconPositions(prev => ({
+              ...prev,
+              'gift-file': { x: 120, y: 20 }
+            }));
+          } else {
+            setDesktopItems(data.desktopItems);
+          }
+        } else {
+          // No desktop items, add gift file
+          const giftFile = {
+            id: 'gift-file',
+            name: 'gift',
+            type: 'file',
+            x: 120,
+            y: 20
+          };
+          setDesktopItems([giftFile]);
+          setIconPositions(prev => ({
+            ...prev,
+            'gift-file': { x: 120, y: 20 }
+          }));
         }
       })
       .catch(() => {
@@ -289,9 +323,19 @@ const WindowsXPDesktop = () => {
           tictactoe: { x: 20, y: 260 },
           pong: { x: 20, y: 340 },
           browser: { x: 20, y: 420 },
-          recyclebin: { x: window.innerWidth - 100, y: window.innerHeight - 120 }
+          recyclebin: { x: window.innerWidth - 100, y: window.innerHeight - 120 },
+          'gift-file': { x: 120, y: 20 }
         };
         setIconPositions(initialPositions);
+        // Add gift file to desktop items
+        const giftFile = {
+          id: 'gift-file',
+          name: 'gift',
+          type: 'file',
+          x: 120,
+          y: 20
+        };
+        setDesktopItems([giftFile]);
       });
     
     return () => {
@@ -1084,7 +1128,10 @@ const WindowsXPDesktop = () => {
               onDoubleClick={(e) => {
                 if (editingItem === item.id) return;
                 handleIconDoubleClick(e, () => {
-                  if (item.type === 'file') {
+                  if (item.id === 'gift-file') {
+                    // Trigger confetti for gift file
+                    setShowConfetti(true);
+                  } else if (item.type === 'file') {
                     // Open file in editor
                     openWindow(
                       `file_${item.id}`, 
@@ -1109,7 +1156,7 @@ const WindowsXPDesktop = () => {
                 handleContextMenu(e, item.id);
               }}
             >
-              <div className="icon-image">{item.type === 'file' ? '📄' : '📁'}</div>
+              <div className="icon-image">{item.id === 'gift-file' ? '🎁' : (item.type === 'file' ? '📄' : '📁')}</div>
               {editingItem === item.id ? (
                 <input
                   type="text"
@@ -1320,6 +1367,11 @@ const WindowsXPDesktop = () => {
       {/* Fullscreen Book Overlay */}
       {isBookOpen && (
         <PortfolioBook onClose={() => setIsBookOpen(false)} />
+      )}
+
+      {/* Confetti */}
+      {showConfetti && (
+        <Confetti onComplete={() => setShowConfetti(false)} />
       )}
 
       {/* Delete Confirmation Modal */}

@@ -2,11 +2,21 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "framework": "vite",
-  "rewrites": [
+  "routes": [
     {
-      "source": "/api/(.*)",
-      "destination": "/api/$1"
+      "src": "/api/files/([^/]+)",
+      "dest": "/api/files/[fileId].js"
     },
+    {
+      "src": "/api/files/([^/]+)/history",
+      "dest": "/api/files/[fileId]/history.js"
+    },
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
+    }
+  ],
+  "rewrites": [
     {
       "source": "/(.*)",
       "destination": "/index.html"

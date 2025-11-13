@@ -157,6 +157,99 @@ function getClientIP(req) {
   return 'unknown';
 }
 
+// Helper function to parse user agent and extract browser/OS info
+function parseUserAgent(userAgent) {
+  if (!userAgent || userAgent === 'unknown') {
+    return {
+      browser: 'Unknown',
+      browserVersion: '',
+      os: 'Unknown',
+      device: 'Unknown'
+    };
+  }
+
+  const ua = userAgent.toLowerCase();
+  
+  // Detect browser
+  let browser = 'Unknown';
+  let browserVersion = '';
+  
+  if (ua.includes('chrome') && !ua.includes('edg')) {
+    browser = 'Chrome';
+    const match = ua.match(/chrome\/([\d.]+)/);
+    if (match) browserVersion = match[1];
+  } else if (ua.includes('firefox')) {
+    browser = 'Firefox';
+    const match = ua.match(/firefox\/([\d.]+)/);
+    if (match) browserVersion = match[1];
+  } else if (ua.includes('safari') && !ua.includes('chrome')) {
+    browser = 'Safari';
+    const match = ua.match(/version\/([\d.]+)/);
+    if (match) browserVersion = match[1];
+  } else if (ua.includes('edg')) {
+    browser = 'Edge';
+    const match = ua.match(/edg\/([\d.]+)/);
+    if (match) browserVersion = match[1];
+  } else if (ua.includes('opera') || ua.includes('opr')) {
+    browser = 'Opera';
+    const match = ua.match(/(?:opera|opr)\/([\d.]+)/);
+    if (match) browserVersion = match[1];
+  }
+  
+  // Detect OS
+  let os = 'Unknown';
+  if (ua.includes('windows')) {
+    os = 'Windows';
+    if (ua.includes('windows nt 10')) os = 'Windows 10/11';
+    else if (ua.includes('windows nt 6.3')) os = 'Windows 8.1';
+    else if (ua.includes('windows nt 6.2')) os = 'Windows 8';
+    else if (ua.includes('windows nt 6.1')) os = 'Windows 7';
+  } else if (ua.includes('mac os')) {
+    os = 'macOS';
+  } else if (ua.includes('linux')) {
+    os = 'Linux';
+  } else if (ua.includes('android')) {
+    os = 'Android';
+    const match = ua.match(/android ([\d.]+)/);
+    if (match) os = `Android ${match[1]}`;
+  } else if (ua.includes('ios') || ua.includes('iphone') || ua.includes('ipad')) {
+    os = 'iOS';
+    const match = ua.match(/os ([\d_]+)/);
+    if (match) os = `iOS ${match[1].replace(/_/g, '.')}`;
+  }
+  
+  // Detect device type
+  let device = 'Desktop';
+  if (ua.includes('mobile') || ua.includes('android') || ua.includes('iphone')) {
+    device = 'Mobile';
+  } else if (ua.includes('tablet') || ua.includes('ipad')) {
+    device = 'Tablet';
+  }
+  
+  return {
+    browser,
+    browserVersion,
+    os,
+    device
+  };
+}
+
+// Helper function to extract additional request metadata
+function getRequestMetadata(req) {
+  const userAgentInfo = parseUserAgent(req.headers['user-agent']);
+  
+  return {
+    referrer: req.headers['referer'] || req.headers['referrer'] || null,
+    origin: req.headers['origin'] || null,
+    acceptLanguage: req.headers['accept-language'] || null,
+    acceptEncoding: req.headers['accept-encoding'] || null,
+    ...userAgentInfo,
+    requestMethod: req.method,
+    contentType: req.headers['content-type'] || null,
+    contentLength: req.headers['content-length'] ? parseInt(req.headers['content-length']) : null
+  };
+}
+
 // Helper function to extract token from headers
 function extractToken(req) {
   if (req.headers.token) {
@@ -378,6 +471,9 @@ app.get('/api/files/:fileId', async (req, res) => {
       fileId: fileId
     });
 
+    // Get additional metadata
+    const metadata = getRequestMetadata(req);
+
     // Log file view access
     await fileAccessLogsCollection.insertOne({
       fileId: fileId,
@@ -385,7 +481,9 @@ app.get('/api/files/:fileId', async (req, res) => {
       userId: userId,
       ipAddress: clientIP,
       timestamp: new Date(),
-      userAgent: req.headers['user-agent'] || 'unknown'
+      userAgent: req.headers['user-agent'] || 'unknown',
+      ...metadata,
+      fileSize: file ? (file.content || '').length : 0
     });
 
     if (file) {
